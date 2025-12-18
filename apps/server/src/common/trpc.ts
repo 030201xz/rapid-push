@@ -1,6 +1,7 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import type { Context as HonoContext } from 'hono';
 import { db } from './db';
+import { trpcLogger } from './logger';
 
 // ========== 用户类型定义（认证上下文中的用户） ==========
 export interface AuthUser {
@@ -35,7 +36,7 @@ const timingMiddleware = t.middleware(async ({ path, type, next }) => {
   const start = performance.now();
   const result = await next();
   const duration = performance.now() - start;
-  console.log(`[tRPC] ${type} ${path} - ${duration.toFixed(2)}ms`);
+  trpcLogger.debug(`${type} ${path}`, { duration: `${duration.toFixed(2)}ms` });
   return result;
 });
 

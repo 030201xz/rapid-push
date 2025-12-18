@@ -7,7 +7,8 @@
 - **Hono** - 超快的 Web 框架，基于 Web Standards
 - **tRPC** - 端到端类型安全的 API，无需代码生成
 - **Drizzle ORM** - 轻量级、类型安全的 TypeScript ORM
-- **Zod** - 运行时类型校验，与 Drizzle 深度集成
+- **@rapid-s/config** - 结构化环境变量配置，支持嵌套 Schema
+- **@rapid-s/logger** - 跨平台日志库，彩色输出 + JSON 格式
 - **postgres-js** - 高性能 PostgreSQL 驱动
 - **Bun** - 快速的 JavaScript 运行时
 
@@ -20,7 +21,8 @@ src/
 │
 ├── common/                     # 公共基础设施
 │   ├── db.ts                   # Drizzle + postgres-js
-│   ├── env.ts                  # 环境变量 Zod 校验
+│   ├── env.ts                  # @rapid-s/config 结构化配置
+│   ├── logger.ts               # @rapid-s/logger 日志实例
 │   ├── trpc.ts                 # tRPC 初始化 + Procedure 定义
 │   └── middleware/
 │       └── index.ts            # Hono 全局中间件

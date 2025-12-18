@@ -10,6 +10,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@rapid-s/config": "^0.1.0",
+    "@rapid-s/logger": "^0.1.0",
     "@trpc/server": "^11.8.0",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",
