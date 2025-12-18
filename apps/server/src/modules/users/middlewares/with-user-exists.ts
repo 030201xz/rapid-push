@@ -3,40 +3,27 @@
  *
  * 检查目标用户是否存在，并将用户注入 ctx.targetUser
  * 后续中间件/handler 可直接访问 ctx.targetUser，避免重复查询
+ *
+ * 使用 tRPC 原生中间件 API，类型自动串联
  */
 
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
-import { createTypedInputMiddleware } from '../../../common/trpc';
-import type { BaseContext } from '../../../types';
+import { middleware } from '../../../common/trpc';
 import type { User } from '../schema';
 import * as userService from '../service';
 
-// 输入类型定义
-const idInputSchema = z.object({ id: z.number() });
-type IdInput = z.infer<typeof idInputSchema>;
-
-// 扩展后的 Context 类型
-export type WithTargetUserContext = BaseContext & { targetUser: User };
-
 /**
- * 类型安全的用户存在性检查中间件
- * - 前置依赖：BaseContext（db 可用）
- * - 扩展输出：ctx.targetUser（User 类型）
+ * 用户存在性检查中间件
+ *
+ * - 要求 input 包含 id: number
+ * - 扩展 ctx.targetUser（User 类型）
+ *
+ * tRPC 原生中间件：类型自动从 procedure 链推断
  */
-export const withUserExists = createTypedInputMiddleware<BaseContext, IdInput>()<
-  WithTargetUserContext
->(async ({ ctx, input, next }) => {
-  // input.id 类型安全，编译时保证
-  const parsed = idInputSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: '缺少必需的 id 参数',
-    });
-  }
+export const withUserExists = middleware(async ({ ctx, input, next }) => {
+  // 类型断言：中间件依赖 .input(z.object({ id: z.number() })) 已在 procedure 中定义
+  const { id } = input as { id: number };
 
-  const { id } = parsed.data;
   const targetUser = await userService.getUserById(ctx.db, id);
 
   if (!targetUser) {
@@ -46,6 +33,9 @@ export const withUserExists = createTypedInputMiddleware<BaseContext, IdInput>()
     });
   }
 
-  // 扩展 Context，类型安全传递
+  // 扩展 Context，tRPC 自动推断后续 ctx.targetUser 类型
   return next({ ctx: { ...ctx, targetUser } });
 });
+
+/** 扩展后的 Context 类型（供外部显式使用） */
+export type WithTargetUserContext = { targetUser: User };
