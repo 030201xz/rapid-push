@@ -1,135 +1,97 @@
-# Turborepo starter
+# Rapid-S
 
-This Turborepo starter is maintained by the Turborepo core team.
+> 零心智负担、优雅简洁、100% 类型安全的全栈 TypeScript 开发脚手架
 
-## Using this example
+## ✨ 特性
 
-Run the following command:
+- **Monorepo** - Turborepo + Bun 工作空间，高效依赖管理
+- **类型安全** - 端到端 TypeScript，zero-any 原则
+- **模块化** - 可复用的包，按需组合
 
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+## 📦 项目结构
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+rapid-s/
+├── apps/
+│   └── server/                 # Hono + tRPC + Drizzle 后端服务
+│
+├── packages/@rapid-s/
+│   ├── config/                 # 结构化环境变量配置
+│   ├── logger/                 # 跨平台日志库
+│   ├── requests/               # HTTP 请求工具
+│   ├── cron/                   # 定时任务调度
+│   └── mcp/                    # MCP 协议实现
+│
+└── turbo.json                  # Turborepo 配置
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🚀 快速开始
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+### 前置要求
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+- [Bun](https://bun.sh/) v1.3+
+- [Docker](https://www.docker.com/) (数据库)
 
-### Develop
+### 安装依赖
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```bash
+bun install
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 启动开发
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+```bash
+# 启动所有服务
+bun run dev
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+# 仅启动后端
+turbo dev --filter=server
 ```
 
-### Remote Caching
+### 构建
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```bash
+bun run build
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+## 📜 可用脚本
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+| 命令 | 说明 |
+|------|------|
+| `bun run dev` | 启动所有开发服务 |
+| `bun run build` | 构建所有包和应用 |
+| `bun run lint` | 运行 ESLint 检查 |
+| `bun run format` | Prettier 格式化代码 |
+| `bun run check-types` | TypeScript 类型检查 |
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
+## 🏗️ 应用
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
+### [apps/server](./apps/server)
 
-## Useful Links
+Hono + tRPC + Drizzle 后端服务，详见 [Server README](./apps/server/README.md)
 
-Learn more about the power of Turborepo:
+## 📚 内部包
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+### [@rapid-s/config](./packages/@rapid-s/config)
+
+结构化环境变量配置，支持嵌套 Schema + 类型推断
+
+### [@rapid-s/logger](./packages/@rapid-s/logger)
+
+跨平台日志库，彩色终端输出 + JSON 格式
+
+### [@rapid-s/requests](./packages/@rapid-s/requests)
+
+类型安全的 HTTP 请求工具
+
+### [@rapid-s/cron](./packages/@rapid-s/cron)
+
+定时任务调度工具
+
+### [@rapid-s/mcp](./packages/@rapid-s/mcp)
+
+Model Context Protocol 实现
+
+## 📄 License
+
+MIT
