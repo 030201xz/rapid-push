@@ -1,3 +1,9 @@
+/**
+ * 环境变量 Schema 定义
+ *
+ * 使用 @rapid-s/config 实现类型安全 + 运行时校验
+ */
+
 import {
   createEnv,
   portSchema,
@@ -8,11 +14,9 @@ import {
 } from '@rapid-s/config';
 import { z } from 'zod';
 
-// ========== 结构化环境变量配置 ==========
-// 使用 @rapid-s/config 实现类型安全 + 运行时校验
 export const env = createEnv({
   schema: {
-    // 服务配置
+    // ========== 服务配置 ==========
     /** 服务端口 -> PORT */
     port: portSchema.default(3000),
     /** 运行环境 -> NODE_ENV */
@@ -20,13 +24,16 @@ export const env = createEnv({
     /** 日志级别 -> LOG_LEVEL */
     logLevel: logLevelSchema.default('info'),
 
-    // JWT 认证配置
-    /** JWT 密钥 -> JWT_SECRET（生产环境必须设置安全的随机字符串） */
-    jwtSecret: z.string().min(32).default('your-super-secret-key-change-in-production'),
-    /** JWT 过期时间 -> JWT_EXPIRES_IN（支持 jose 格式：2h、7d、30d 等） */
+    // ========== JWT 认证配置 ==========
+    /** JWT 密钥 -> JWT_SECRET */
+    jwtSecret: z
+      .string()
+      .min(32)
+      .default('your-super-secret-key-change-in-production'),
+    /** JWT 过期时间 -> JWT_EXPIRES_IN */
     jwtExpiresIn: z.string().default('7d'),
 
-    // 数据库配置（支持嵌套结构）
+    // ========== 数据库配置 ==========
     database: {
       /** 连接 URL -> DATABASE_URL */
       url: databaseUrlSchema.optional(),
@@ -52,12 +59,5 @@ export const env = createEnv({
   },
 });
 
-// ========== 构建数据库连接 URL ==========
-export function getDatabaseUrl(): string {
-  if (env.database.url) return env.database.url;
-  const { user, password, host, port, name } = env.database;
-  return `postgresql://${user}:${password}@${host}:${port}/${name}`;
-}
-
-// 类型自动推导
+/** 环境变量类型（自动推导） */
 export type Env = typeof env;

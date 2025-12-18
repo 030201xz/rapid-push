@@ -7,7 +7,7 @@ import {
 } from '../../common/trpc';
 import { insertUserSchema, updateUserSchema } from './schema';
 import * as userService from './service';
-import { withUserExists, withSelfOnly } from './middleware';
+import { withUserExists, withSelfOnly } from './middlewares';
 
 // ========== 用户路由 ==========
 export const usersRouter = router({

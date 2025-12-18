@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import type { Database } from '../../common/db';
+import type { RapidSDatabase as Database } from '../../common/database/postgresql/rapid-s';
 import { users, type NewUser, type UpdateUser, type User } from './schema';
 
 // ========== 业务逻辑：纯函数，依赖注入 db ==========

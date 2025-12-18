@@ -4,14 +4,14 @@
  */
 
 import type { Context as HonoContext } from 'hono';
-import { db } from '../db';
+import { getDb } from '../database/postgresql/rapid-s';
 import { verifyToken } from '../auth';
 import type { AuthUser, BaseContext } from '../../types';
 
 // ========== Context 创建函数 ==========
 export function createContext(c: HonoContext): BaseContext {
   return {
-    db,
+    db: getDb(),
     requestId: c.get('requestId') as string | undefined,
     // 从 Authorization header 解析 JWT
     getUser: async (): Promise<AuthUser | null> => {

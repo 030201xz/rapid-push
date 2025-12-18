@@ -20,20 +20,64 @@ src/
 ├── app.ts                      # Hono 应用 + tRPC 挂载
 │
 ├── common/                     # 公共基础设施
-│   ├── db.ts                   # Drizzle + postgres-js
-│   ├── env.ts                  # @rapid-s/config 结构化配置
 │   ├── logger.ts               # @rapid-s/logger 日志实例
-│   ├── trpc.ts                 # tRPC 初始化 + Procedure 定义
-│   └── middleware/
-│       └── index.ts            # Hono 全局中间件
+│   │
+│   ├── auth/                   # 认证模块
+│   │   ├── index.ts
+│   │   └── jwt.ts              # JWT 签发/验证
+│   │
+│   ├── env/                    # 环境变量配置
+│   │   ├── index.ts
+│   │   ├── schema.ts           # @rapid-s/config 结构化配置
+│   │   └── utils.ts            # getDatabaseUrl 等工具
+│   │
+│   ├── database/               # 数据库（支持多实例）
+│   │   ├── postgresql/
+│   │   │   └── rapid-s/        # 主数据库实例
+│   │   │       ├── index.ts
+│   │   │       ├── client.ts   # 连接工厂
+│   │   │       ├── types.ts    # 类型定义
+│   │   │       └── transaction.ts
+│   │   └── redis/
+│   │       └── rapid-s/        # Redis 实例（预留）
+│   │
+│   ├── middleware/             # Hono 全局中间件
+│   │   ├── index.ts
+│   │   ├── cors.ts
+│   │   ├── logger.ts
+│   │   ├── error.ts
+│   │   └── request-id.ts
+│   │
+│   └── trpc/                   # tRPC 配置
+│       ├── index.ts
+│       ├── init.ts             # tRPC 实例初始化
+│       ├── context.ts          # Context 创建
+│       └── procedures/
+│           ├── index.ts
+│           ├── base.ts
+│           ├── public.ts
+│           ├── protected.ts
+│           └── admin.ts
 │
-└── modules/                    # 业务模块（核心）
-    ├── index.ts                # Router 聚合 → AppRouter
-    └── users/                  # 用户模块示例
-        ├── schema.ts           # 表定义 + Zod schema
-        ├── service.ts          # 业务逻辑（纯函数）
-        ├── router.ts           # tRPC 路由
-        └── middleware.ts       # 模块专属中间件
+├── modules/                    # 业务模块（核心）
+│   ├── index.ts                # Router 聚合 → AppRouter
+│   └── users/                  # 用户模块示例
+│       ├── schema.ts           # 表定义 + Zod schema
+│       ├── service.ts          # 业务逻辑（纯函数）
+│       ├── router.ts           # tRPC 路由
+│       └── middlewares/        # 模块专属中间件
+│           ├── index.ts
+│           ├── with-user-exists.ts
+│           └── with-self-only.ts
+│
+└── types/                      # 全局类型定义
+    ├── index.ts
+    ├── router.ts               # AppRouter 类型
+    └── context/                # Context 类型层级
+        ├── index.ts
+        ├── base.ts
+        ├── auth.ts
+        └── hono.ts
 ```
 
 ## 🚀 快速开始
