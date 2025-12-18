@@ -7,7 +7,7 @@ import {
   loggerMiddleware,
   errorHandler,
   requestIdMiddleware,
-} from './common/middleware';
+} from './common/middlewares';
 import type { AppEnv } from './types';
 
 // ========== Hono 应用（强类型环境） ==========
