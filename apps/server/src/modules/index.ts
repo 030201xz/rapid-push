@@ -9,5 +9,12 @@ export const appRouter = router({
   // orders: ordersRouter,
 });
 
-// 导出类型供客户端使用
+// ========== 类型导出 ==========
+
+/** AppRouter 类型（tRPC 客户端使用） */
 export type AppRouter = typeof appRouter;
+
+/** 用户模块类型 */
+export * as UsersTypes from './users/types';
+// export * as PostsTypes from './posts/types';
+// export * as OrdersTypes from './orders/types';
