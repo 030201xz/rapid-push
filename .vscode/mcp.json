@@ -1,0 +1,20 @@
+{
+  "servers": {
+    // "Bun": {
+    //   "url": "https://bun.com/docs/mcp",
+    //   "type": "http"
+    // },
+    // "decimal-calculator": {
+    //   "command": "bun",
+    //   "args": ["run", "src/index.ts"],
+    //   "cwd": "${workspaceFolder}/packages/mcp/base-mcp"
+    // },
+    // "mcp-demo": {
+    //   "command": "bun",
+    //   "args": ["run", "src/index.ts"],
+    //   "cwd": "${workspaceFolder}/packages/mcp/ego-mcp"
+    // }
+
+  },
+  "inputs": []
+}

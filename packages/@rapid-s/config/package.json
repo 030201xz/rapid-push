@@ -1,0 +1,54 @@
+{
+  "name": "@rapid-s/config",
+  "version": "0.1.0",
+  "description": "类型安全的配置管理，借鉴 T3 Env 设计理念",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "env",
+    "environment",
+    "config",
+    "configuration",
+    "validation",
+    "typescript",
+    "type-safe",
+    "zod"
+  ],
+  "scripts": {
+    "install:pkg": "bun install",
+    "build": "tsup",
+    "build:pkg": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
+  },
+  "dependencies": {
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.3",
+    "tsup": "^8.5.1",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,9 +1,12 @@
-import { Hono } from 'hono'
+import { app } from './app';
+import { env } from './common/env';
 
-const app = new Hono()
+// ========== Bun 原生服务 ==========
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+Bun.serve({
+  port: env.PORT,
+  fetch: app.fetch,
+  reusePort: true,
+});
 
-export default app
+console.log(`🚀 Server running on http://localhost:${env.PORT}`);

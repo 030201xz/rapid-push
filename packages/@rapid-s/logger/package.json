@@ -1,0 +1,61 @@
+{
+  "name": "@rapid-s/logger",
+  "version": "0.1.0",
+  "description": "通用跨平台日志库 - 支持浏览器和 Node.js/Bun 终端环境",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./browser": {
+      "import": {
+        "types": "./dist/browser.d.ts",
+        "default": "./dist/browser.js"
+      },
+      "require": {
+        "types": "./dist/browser.d.cts",
+        "default": "./dist/browser.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "logger",
+    "log",
+    "logging",
+    "browser",
+    "node",
+    "bun",
+    "terminal",
+    "console",
+    "cross-platform"
+  ],
+  "scripts": {
+    "install:pkg": "bun install",
+    "build": "tsup",
+    "build:pkg": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "bun run build"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tsup": "^8.5.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
