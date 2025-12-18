@@ -4,6 +4,10 @@
       "name": "🔥 Server",
       "path": "apps/server",
     },
+        {
+      "name": "🤖️ MCP",
+      "path": "packages/@rapid-s/mcp/src/tools",
+    },
     {
       "name": "ROOT",
       "path": ".",

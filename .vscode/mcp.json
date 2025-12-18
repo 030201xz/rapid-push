@@ -14,7 +14,15 @@
     //   "args": ["run", "src/index.ts"],
     //   "cwd": "${workspaceFolder}/packages/mcp/ego-mcp"
     // }
-
+    "skills-mcp": {
+      "command": "bun",
+      // "args": ["run", "src/index.ts"]
+      "args": ["run", "./packages/@rapid-s/mcp/src/index.ts"],
+      // "cwd": "${workspaceFolder}/packages/@rapid-s/mcp"
+      // "env": {
+      //   "SKILLS_MCP_TOOLS_PATH": "/home/wf/.skills-mcp/tools"
+      // }
+    }
   },
   "inputs": []
 }
