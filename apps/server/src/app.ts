@@ -8,14 +8,10 @@ import {
   errorHandler,
   requestIdMiddleware,
 } from './common/middleware';
+import type { AppEnv } from './types';
 
-// ========== 类型定义 ==========
-type Variables = {
-  requestId: string;
-};
-
-// ========== Hono 应用 ==========
-const app = new Hono<{ Variables: Variables }>();
+// ========== Hono 应用（强类型环境） ==========
+const app = new Hono<AppEnv>();
 
 // ========== Hono 全局中间件（按顺序执行） ==========
 app.use('*', errorHandler); // 最外层：捕获所有错误

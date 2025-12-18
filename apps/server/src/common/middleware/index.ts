@@ -2,6 +2,7 @@ import { cors } from 'hono/cors';
 import { createMiddleware } from 'hono/factory';
 import { env } from '../env';
 import { apiLogger } from '../logger';
+import type { AppEnv } from '../../types';
 
 // ========== CORS 配置 ==========
 export const corsMiddleware = cors({
@@ -12,7 +13,7 @@ export const corsMiddleware = cors({
 });
 
 // ========== 请求日志（使用 @rapid-s/logger） ==========
-export const loggerMiddleware = createMiddleware(async (c, next) => {
+export const loggerMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   const start = performance.now();
   const method = c.req.method;
   const path = c.req.path;
@@ -33,7 +34,7 @@ export const loggerMiddleware = createMiddleware(async (c, next) => {
 });
 
 // ========== 全局错误处理 ==========
-export const errorHandler = createMiddleware(async (c, next) => {
+export const errorHandler = createMiddleware<AppEnv>(async (c, next) => {
   try {
     await next();
   } catch (error) {
@@ -42,10 +43,10 @@ export const errorHandler = createMiddleware(async (c, next) => {
   }
 });
 
-// ========== 请求 ID（用于追踪） ==========
-export const requestIdMiddleware = createMiddleware(async (c, next) => {
+// ========== 请求 ID（用于追踪，注入 requestId 到 Variables） ==========
+export const requestIdMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   const requestId = crypto.randomUUID();
-  c.set('requestId', requestId);
+  c.set('requestId', requestId); // 类型安全：AppEnv.Variables.requestId
   c.header('X-Request-Id', requestId);
   await next();
 });

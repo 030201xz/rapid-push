@@ -20,6 +20,12 @@ export const env = createEnv({
     /** 日志级别 -> LOG_LEVEL */
     logLevel: logLevelSchema.default('info'),
 
+    // JWT 认证配置
+    /** JWT 密钥 -> JWT_SECRET（生产环境必须设置安全的随机字符串） */
+    jwtSecret: z.string().min(32).default('your-super-secret-key-change-in-production'),
+    /** JWT 过期时间 -> JWT_EXPIRES_IN（支持 jose 格式：2h、7d、30d 等） */
+    jwtExpiresIn: z.string().default('7d'),
+
     // 数据库配置（支持嵌套结构）
     database: {
       /** 连接 URL -> DATABASE_URL */
