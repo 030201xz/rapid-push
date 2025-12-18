@@ -1,0 +1,46 @@
+-- 启用 pgvector 扩展
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- 创建文档表：存储原始文档和向量嵌入
+-- embedding 列使用 1536 维度（OpenAI text-embedding-3-small 标准维度）
+CREATE TABLE IF NOT EXISTS documents (
+    id SERIAL PRIMARY KEY,
+    content TEXT NOT NULL,
+    metadata JSONB DEFAULT '{}',
+    -- 向量维度根据使用的 embedding 模型调整
+    -- OpenAI text-embedding-3-small: 1536
+    -- OpenAI text-embedding-3-large: 3072
+    -- 本地模型如 all-MiniLM-L6-v2: 384
+    embedding vector(1536),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建 HNSW 索引，优化向量相似度检索性能
+-- 使用余弦距离（cosine distance），适合文本语义相似度
+CREATE INDEX IF NOT EXISTS documents_embedding_idx 
+ON documents 
+USING hnsw (embedding vector_cosine_ops);
+
+-- 创建更新时间触发器
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+CREATE TRIGGER update_documents_updated_at
+    BEFORE UPDATE ON documents
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+
+-- 示例：插入文档（不带向量，后续通过应用程序更新）
+-- INSERT INTO documents (content, metadata) VALUES ('示例文档内容', '{"source": "manual"}');
+
+-- 示例：相似度查询（使用余弦距离）
+-- SELECT id, content, 1 - (embedding <=> '[...]'::vector) as similarity
+-- FROM documents
+-- ORDER BY embedding <=> '[...]'::vector
+-- LIMIT 10;

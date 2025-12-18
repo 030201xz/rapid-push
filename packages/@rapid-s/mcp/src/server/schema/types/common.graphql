@@ -1,0 +1,18 @@
+# 公共类型定义
+
+scalar DateTime
+scalar JSON
+
+type Query {
+  _health: HealthCheck!
+}
+
+type Mutation {
+  _noop: Boolean
+}
+
+type HealthCheck {
+  status: String!
+  timestamp: DateTime!
+  version: String!
+}

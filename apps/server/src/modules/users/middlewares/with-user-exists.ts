@@ -7,12 +7,27 @@
 
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { t } from '../../../common/trpc/init';
+import { createTypedInputMiddleware } from '../../../common/trpc';
+import type { BaseContext } from '../../../types';
+import type { User } from '../schema';
 import * as userService from '../service';
 
+// 输入类型定义
 const idInputSchema = z.object({ id: z.number() });
+type IdInput = z.infer<typeof idInputSchema>;
 
-export const withUserExists = t.middleware(async ({ ctx, input, next }) => {
+// 扩展后的 Context 类型
+export type WithTargetUserContext = BaseContext & { targetUser: User };
+
+/**
+ * 类型安全的用户存在性检查中间件
+ * - 前置依赖：BaseContext（db 可用）
+ * - 扩展输出：ctx.targetUser（User 类型）
+ */
+export const withUserExists = createTypedInputMiddleware<BaseContext, IdInput>()<
+  WithTargetUserContext
+>(async ({ ctx, input, next }) => {
+  // input.id 类型安全，编译时保证
   const parsed = idInputSchema.safeParse(input);
   if (!parsed.success) {
     throw new TRPCError({
@@ -31,5 +46,6 @@ export const withUserExists = t.middleware(async ({ ctx, input, next }) => {
     });
   }
 
+  // 扩展 Context，类型安全传递
   return next({ ctx: { ...ctx, targetUser } });
 });

@@ -1,0 +1,30 @@
+# PostgreSQL + pgvector 数据库部署配置
+# 支持向量存储和相似度检索
+
+services:
+  postgres:
+    # 使用 pgvector 镜像，内置 vector 扩展
+    image: pgvector/pgvector:pg17
+    container_name: mcp-pgvector-demo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: ego_db
+    ports:
+      # 映射到 5434 端口，避免与其他 PostgreSQL 实例冲突
+      - "5434:5432"
+    volumes:
+      # 数据持久化
+      - mcp_pgvector_data:/var/lib/postgresql/data
+      # 初始化脚本：自动启用 pgvector 扩展
+      - ./initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ego_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mcp_pgvector_data:
+    driver: local

@@ -1,0 +1,62 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  username: String!
+}
+
+scalar DateTime
+
+type HealthCheck {
+  status: String!
+  timestamp: DateTime!
+  version: String!
+}
+
+scalar JSON
+
+type Mutation {
+  _noop: Boolean
+  createUser(input: CreateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+}
+
+type Query {
+  _health: HealthCheck!
+  me: User
+  user(id: ID!): User
+  users(page: Int, pageSize: Int): UserList!
+}
+
+input UpdateUserInput {
+  email: String
+  username: String
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  status: UserStatus!
+  updatedAt: DateTime!
+  username: String!
+}
+
+type UserList {
+  items: [User!]!
+  page: Int!
+  pageSize: Int!
+  total: Int!
+  totalPages: Int!
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
