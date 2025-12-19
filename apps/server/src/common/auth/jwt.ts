@@ -5,11 +5,14 @@
  * 设计说明:
  * - Payload 包含用户核心信息和角色列表
  * - 使用 Role['code'] 类型保证类型安全
+ * - 包含 jti (JWT ID) 用于黑名单管理
+ * - 包含 sessionId 用于会话关联
  */
 
 import type { Role } from '@/modules/core/access-control/roles/schema';
 import type { User } from '@/modules/core/identify/users/schema';
 import type { AuthUser } from '@/types/index';
+import { randomUUID } from 'crypto';
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { env } from '../env';
 
@@ -29,6 +32,10 @@ function getSecret(): Uint8Array {
 export interface JwtUserPayload extends JWTPayload {
   /** 用户 ID（作为 subject） */
   sub: User['id'];
+  /** JWT ID（用于黑名单管理） */
+  jti: string;
+  /** 会话 ID（关联登录会话） */
+  sessionId: string;
   /** 用户名 */
   username: User['username'];
   /** 邮箱 */
@@ -37,34 +44,71 @@ export interface JwtUserPayload extends JWTPayload {
   roles: Role['code'][];
 }
 
+/** 签发 Token 的额外选项 */
+export interface SignTokenOptions {
+  /** 会话 ID（必须提供） */
+  sessionId: string;
+  /** 自定义 jti（可选，默认自动生成） */
+  jti?: string;
+}
+
 // ========== 签发 JWT ==========
 
 /** 签发 JWT Token */
-export async function signToken(user: AuthUser): Promise<string> {
+export async function signToken(
+  user: AuthUser,
+  options: SignTokenOptions
+): Promise<{ token: string; jti: string }> {
   const secret = getSecret();
+  const jti = options.jti ?? randomUUID();
 
-  const jwt = await new SignJWT({
+  const token = await new SignJWT({
     username: user.username,
     email: user.email,
     roles: user.roles,
+    sessionId: options.sessionId,
   } satisfies Omit<JwtUserPayload, keyof JWTPayload | 'sub'>)
     .setProtectedHeader({ alg: JWT_ALG })
     .setIssuedAt()
     .setIssuer(JWT_ISSUER)
     .setAudience(JWT_AUDIENCE)
     .setSubject(user.id)
+    .setJti(jti)
     .setExpirationTime(env.jwtExpiresIn)
     .sign(secret);
 
-  return jwt;
+  return { token, jti };
 }
 
 // ========== 验证 JWT ==========
 
-/** 验证 JWT Token 并返回用户信息 */
+/** Token 验证结果 */
+export interface VerifyTokenResult {
+  /** 是否有效 */
+  valid: boolean;
+  /** 用户信息（有效时） */
+  user?: AuthUser;
+  /** JWT ID（有效时） */
+  jti?: string;
+  /** 会话 ID（有效时） */
+  sessionId?: string;
+  /** 错误原因（无效时） */
+  error?:
+    | 'INVALID_TOKEN'
+    | 'EXPIRED'
+    | 'BLACKLISTED'
+    | 'MISSING_FIELDS';
+}
+
+/**
+ * 验证 JWT Token（基础验证，不检查黑名单）
+ *
+ * 注意：此函数仅做 JWT 签名验证，不检查黑名单
+ * 完整验证请使用 auth 模块的中间件
+ */
 export async function verifyToken(
   token: string
-): Promise<AuthUser | null> {
+): Promise<VerifyTokenResult> {
   try {
     const secret = getSecret();
 
@@ -76,27 +120,47 @@ export async function verifyToken(
     // 类型守卫：验证必要字段存在
     if (
       typeof payload.sub !== 'string' ||
+      typeof payload.jti !== 'string' ||
+      typeof payload.sessionId !== 'string' ||
       typeof payload.username !== 'string' ||
       !Array.isArray(payload.roles)
     ) {
-      return null;
+      return { valid: false, error: 'MISSING_FIELDS' };
     }
 
     const userPayload = payload as JwtUserPayload;
 
-    // 返回 AuthUser（仅包含 JWT 中的字段）
     return {
-      id: userPayload.sub,
-      username: userPayload.username,
-      nickname: null,
-      email: userPayload.email ?? null,
-      phone: null,
-      avatarUrl: null,
-      status: 'active', // JWT 验证通过说明账户处于激活状态
-      roles: userPayload.roles,
+      valid: true,
+      user: {
+        id: userPayload.sub,
+        username: userPayload.username,
+        nickname: null,
+        email: userPayload.email ?? null,
+        phone: null,
+        avatarUrl: null,
+        status: 'active',
+        roles: userPayload.roles,
+      },
+      jti: userPayload.jti,
+      sessionId: userPayload.sessionId,
     };
-  } catch {
-    // JWT 验证失败（过期、签名错误等）
-    return null;
+  } catch (error) {
+    // 判断是否是过期错误
+    if (error instanceof Error && error.message.includes('expired')) {
+      return { valid: false, error: 'EXPIRED' };
+    }
+    return { valid: false, error: 'INVALID_TOKEN' };
   }
+}
+
+/**
+ * 旧版验证函数（兼容）
+ * @deprecated 请使用 verifyToken 获取完整结果
+ */
+export async function verifyTokenLegacy(
+  token: string
+): Promise<AuthUser | null> {
+  const result = await verifyToken(token);
+  return result.valid ? result.user ?? null : null;
 }

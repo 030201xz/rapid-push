@@ -17,7 +17,7 @@
     "skills-mcp": {
       "command": "bun",
       // "args": ["run", "src/index.ts"]
-      "args": ["run", "./packages/@x/x-skills-mcp/src/index.ts"],
+      "args": ["run", "./packages/@rapid-s/mcp/src/index.ts"]
       // "cwd": "${workspaceFolder}/packages/@x/x-skills-mcp"
       // "env": {
       //   "SKILLS_MCP_TOOLS_PATH": "/home/xz/Projects/030201xy/wf/.skills-mcp/tools"

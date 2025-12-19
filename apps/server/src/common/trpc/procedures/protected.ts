@@ -10,15 +10,22 @@ import { baseProcedure } from './base';
 
 // ========== 认证中间件 ==========
 const isAuthed = t.middleware(async ({ ctx, next }) => {
-  const user = await ctx.getUser();
-  if (!user) {
+  const auth = await ctx.getAuth();
+  if (!auth) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: '请先登录',
     });
   }
-  // 类型收窄：后续 procedure 的 ctx.user 一定存在
-  return next({ ctx: { ...ctx, user } as AuthContext });
+  // 类型收窄：后续 procedure 的 ctx 包含 user, jti, sessionId
+  return next({
+    ctx: {
+      ...ctx,
+      user: auth.user,
+      jti: auth.jti,
+      sessionId: auth.sessionId,
+    } as AuthContext,
+  });
 });
 
 // ========== Protected Procedure（需登录） ==========

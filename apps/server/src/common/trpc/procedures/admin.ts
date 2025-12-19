@@ -10,22 +10,29 @@ import { baseProcedure } from './base';
 
 // ========== 管理员认证中间件 ==========
 const isAdmin = t.middleware(async ({ ctx, next }) => {
-  const user = await ctx.getUser();
-  if (!user) {
+  const auth = await ctx.getAuth();
+  if (!auth) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: '请先登录',
     });
   }
   // 检查 roles 数组是否包含 admin
-  if (!user.roles.includes('admin')) {
+  if (!auth.user.roles.includes('admin')) {
     throw new TRPCError({
       code: 'FORBIDDEN',
       message: '需要管理员权限',
     });
   }
-  // 类型收窄：roles 包含 admin
-  return next({ ctx: { ...ctx, user } as AdminContext });
+  // 类型收窄：roles 包含 admin，同时携带 jti/sessionId
+  return next({
+    ctx: {
+      ...ctx,
+      user: auth.user,
+      jti: auth.jti,
+      sessionId: auth.sessionId,
+    } as AdminContext,
+  });
 });
 
 // ========== Admin Procedure（需管理员权限） ==========

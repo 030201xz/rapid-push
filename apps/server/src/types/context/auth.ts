@@ -32,9 +32,14 @@ export type AuthUser = AuthUserFields & {
 
 // ========== 认证后 Context ==========
 
-/** 已认证上下文（ctx.user 存在） */
+/** 已认证上下文（ctx.user 存在，并包含 jti/sessionId） */
 export interface AuthContext extends BaseContext {
+  /** 当前认证用户 */
   user: AuthUser;
+  /** 当前 JWT ID（用于黑名单管理） */
+  jti: string;
+  /** 当前会话 ID */
+  sessionId: string;
 }
 
 // ========== 管理员 Context ==========
@@ -42,4 +47,6 @@ export interface AuthContext extends BaseContext {
 /** 管理员上下文（roles 包含 admin） */
 export interface AdminContext extends BaseContext {
   user: AuthUser & { roles: ['admin', ...Role['code'][]] };
+  jti: string;
+  sessionId: string;
 }
