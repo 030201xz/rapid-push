@@ -4,17 +4,19 @@
  *
  * 按依赖顺序插入：
  * 1. 权限 (permissions)
- * 2. 角色 (roles)
+ * 2. 角色 (roles) - 包含组织角色 org:owner/admin/member
  * 3. 角色权限映射 (role_permission_mappings)
  * 4. 用户 (users)
  * 5. 用户角色映射 (user_role_mappings)
  * 6. 组织 (organizations) - hot-update
- * 7. 项目 (projects) - hot-update
- * 8. 渠道 (channels) - hot-update
+ * 7. 组织成员映射 (user_role_mappings + scope) - 为 owner 分配 org:owner
+ * 8. 项目 (projects) - hot-update
+ * 9. 渠道 (channels) - hot-update
  *
  * 运行方式: bun scripts/init/init-all.ts
  */
 
+import { SCOPE_TYPE } from '@/modules/core/access-control/constants';
 import { permissions as permissionsTable } from '@/modules/core/access-control/permissions/schema';
 import { rolePermissionMappings } from '@/modules/core/access-control/role-permission-mappings/schema';
 import { roles as rolesTable } from '@/modules/core/access-control/roles/schema';
@@ -280,13 +282,22 @@ async function insertUserRoleMappings(idMaps: IdMaps): Promise<void> {
 // Hot Update 数据插入函数
 // ============================================================================
 
-/** 插入组织数据 */
+/** 插入组织数据并为 owner 分配组织角色 */
 async function insertOrganizations(
   coreIdMaps: IdMaps,
   hotUpdateIdMaps: HotUpdateIdMaps
 ): Promise<void> {
   logger.info('创建组织...');
   const db = getDb();
+
+  // 获取 org:owner 角色 ID
+  const orgOwnerRoleId = coreIdMaps.roles.get('ORG_OWNER');
+  if (!orgOwnerRoleId) {
+    logger.error(
+      'org:owner 角色 ID 未找到，请确保已在 RoleIds 中配置'
+    );
+    return;
+  }
 
   for (const org of hotUpdateConfig.organizations) {
     const { key, ownerKey, ...data } = org;
@@ -316,7 +327,21 @@ async function insertOrganizations(
         },
       });
 
-    logger.debug(`  ✓ ${data.name} (${data.slug})`);
+    // 为 owner 分配 org:owner 角色 (带 scope)
+    await db
+      .insert(userRoleMappings)
+      .values({
+        userId: ownerId,
+        roleId: orgOwnerRoleId,
+        scopeType: SCOPE_TYPE.ORGANIZATION,
+        scopeId: id,
+        assignReason: '组织创建时自动分配',
+      })
+      .onConflictDoNothing();
+
+    logger.debug(
+      `  ✓ ${data.name} (${data.slug}) - owner: ${ownerKey}`
+    );
   }
 
   logger.info(

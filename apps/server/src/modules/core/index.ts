@@ -18,9 +18,15 @@ export const coreRouter = router({
 
 // ========== 重导出子域类型命名空间 ==========
 export {
+  ORG_ADMIN_ROLES,
+  ORG_ROLE_CODE,
+  ORG_ROLES_SEED,
   PermissionsTypes,
   RolePermissionMappingsTypes,
   RolesTypes,
+  SCOPE_TYPE,
   UserRoleMappingsTypes,
+  type OrgRoleCode,
+  type ScopeType,
 } from './access-control';
 export { UsersTypes } from './identify';

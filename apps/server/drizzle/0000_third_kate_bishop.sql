@@ -40,6 +40,8 @@ CREATE TABLE "rapid_s"."user_role_mappings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
 	"role_id" uuid NOT NULL,
+	"scope_type" varchar(20) DEFAULT 'global' NOT NULL,
+	"scope_id" uuid,
 	"effective_from" timestamp DEFAULT now() NOT NULL,
 	"effective_to" timestamp,
 	"assigned_by" uuid,
@@ -47,7 +49,7 @@ CREATE TABLE "rapid_s"."user_role_mappings" (
 	"is_revoked" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "uq_user_role_active" UNIQUE("user_id","role_id")
+	CONSTRAINT "uq_user_role_scope" UNIQUE("user_id","role_id","scope_type","scope_id")
 );
 --> statement-breakpoint
 CREATE TABLE "rapid_s"."users" (
@@ -115,17 +117,6 @@ CREATE TABLE "rapid_s"."directives" (
 	"is_active" boolean DEFAULT true NOT NULL,
 	"expires_at" timestamp,
 	"created_at" timestamp DEFAULT now() NOT NULL
-);
---> statement-breakpoint
-CREATE TABLE "rapid_s"."organization_members" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" uuid NOT NULL,
-	"user_id" uuid NOT NULL,
-	"role" varchar(20) DEFAULT 'member' NOT NULL,
-	"joined_at" timestamp DEFAULT now() NOT NULL,
-	"is_active" boolean DEFAULT true NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "rapid_s"."organizations" (
@@ -253,8 +244,6 @@ ALTER TABLE "rapid_s"."user_role_mappings" ADD CONSTRAINT "user_role_mappings_ro
 ALTER TABLE "rapid_s"."user_role_mappings" ADD CONSTRAINT "user_role_mappings_assigned_by_users_id_fk" FOREIGN KEY ("assigned_by") REFERENCES "rapid_s"."users"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rapid_s"."channels" ADD CONSTRAINT "channels_project_id_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "rapid_s"."projects"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rapid_s"."directives" ADD CONSTRAINT "directives_channel_id_channels_id_fk" FOREIGN KEY ("channel_id") REFERENCES "rapid_s"."channels"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "rapid_s"."organization_members" ADD CONSTRAINT "organization_members_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "rapid_s"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "rapid_s"."organization_members" ADD CONSTRAINT "organization_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "rapid_s"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rapid_s"."organizations" ADD CONSTRAINT "organizations_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "rapid_s"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rapid_s"."projects" ADD CONSTRAINT "projects_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "rapid_s"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rapid_s"."rollout_rules" ADD CONSTRAINT "rollout_rules_update_id_updates_id_fk" FOREIGN KEY ("update_id") REFERENCES "rapid_s"."updates"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -277,6 +266,7 @@ CREATE INDEX "idx_roles_level" ON "rapid_s"."roles" USING btree ("level");--> st
 CREATE INDEX "idx_roles_active_deleted" ON "rapid_s"."roles" USING btree ("is_active","is_deleted");--> statement-breakpoint
 CREATE INDEX "idx_user_role_mappings_user_id" ON "rapid_s"."user_role_mappings" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "idx_user_role_mappings_role_id" ON "rapid_s"."user_role_mappings" USING btree ("role_id");--> statement-breakpoint
+CREATE INDEX "idx_user_role_mappings_scope" ON "rapid_s"."user_role_mappings" USING btree ("scope_type","scope_id");--> statement-breakpoint
 CREATE INDEX "idx_user_role_mappings_effective" ON "rapid_s"."user_role_mappings" USING btree ("effective_from","effective_to");--> statement-breakpoint
 CREATE INDEX "idx_user_role_mappings_is_revoked" ON "rapid_s"."user_role_mappings" USING btree ("is_revoked");--> statement-breakpoint
 CREATE INDEX "idx_users_username" ON "rapid_s"."users" USING btree ("username");--> statement-breakpoint
@@ -294,11 +284,6 @@ CREATE INDEX "idx_directives_channel_id" ON "rapid_s"."directives" USING btree (
 CREATE INDEX "idx_directives_channel_runtime" ON "rapid_s"."directives" USING btree ("channel_id","runtime_version");--> statement-breakpoint
 CREATE INDEX "idx_directives_is_active" ON "rapid_s"."directives" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "idx_directives_expires_at" ON "rapid_s"."directives" USING btree ("expires_at");--> statement-breakpoint
-CREATE INDEX "idx_organization_members_org_id" ON "rapid_s"."organization_members" USING btree ("organization_id");--> statement-breakpoint
-CREATE INDEX "idx_organization_members_user_id" ON "rapid_s"."organization_members" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "idx_organization_members_org_user" ON "rapid_s"."organization_members" USING btree ("organization_id","user_id");--> statement-breakpoint
-CREATE INDEX "idx_organization_members_role" ON "rapid_s"."organization_members" USING btree ("role");--> statement-breakpoint
-CREATE INDEX "idx_organization_members_is_active" ON "rapid_s"."organization_members" USING btree ("is_active");--> statement-breakpoint
 CREATE INDEX "idx_organizations_slug" ON "rapid_s"."organizations" USING btree ("slug");--> statement-breakpoint
 CREATE INDEX "idx_organizations_owner_id" ON "rapid_s"."organizations" USING btree ("owner_id");--> statement-breakpoint
 CREATE INDEX "idx_organizations_is_deleted" ON "rapid_s"."organizations" USING btree ("is_deleted");--> statement-breakpoint

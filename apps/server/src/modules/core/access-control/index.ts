@@ -18,6 +18,16 @@ export const accessControlRouter = router({
   rolePermissionMappings: rolePermissionMappingsRouter,
 });
 
+// ========== Constants 导出 ==========
+export {
+  ORG_ADMIN_ROLES,
+  ORG_ROLE_CODE,
+  ORG_ROLES_SEED,
+  SCOPE_TYPE,
+  type OrgRoleCode,
+  type ScopeType,
+} from './constants';
+
 // ========== 类型命名空间导出 ==========
 export * as PermissionsTypes from './permissions/types';
 export * as RolePermissionMappingsTypes from './role-permission-mappings/types';

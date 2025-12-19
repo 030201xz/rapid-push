@@ -6,23 +6,36 @@
 
 // ========== Schema 类型 ==========
 export type {
-  UserRoleMapping,
   NewUserRoleMapping,
   UpdateUserRoleMapping,
+  UserRoleMapping,
 } from './schema';
 
 // ========== Zod Schema（前端可复用验证） ==========
 export {
   insertUserRoleMappingSchema,
-  updateUserRoleMappingSchema,
   selectUserRoleMappingSchema,
+  updateUserRoleMappingSchema,
 } from './schema';
 
 // ========== Service 返回类型 ==========
 export type {
-  GetUserRolesResult,
-  GetRoleUsersResult,
-  GetMappingResult,
+  AssignOrgRoleResult,
   AssignRoleResult,
+  GetMappingResult,
+  GetRoleUsersResult,
+  GetUserOrgRolesResult,
+  GetUserRolesResult,
+  ListOrgMembersResult,
+  ListUserOrganizationsResult,
   RevokeRoleResult,
 } from './service';
+
+// ========== Constants（前端可用） ==========
+export {
+  ORG_ADMIN_ROLES,
+  ORG_ROLE_CODE,
+  SCOPE_TYPE,
+  type OrgRoleCode,
+  type ScopeType,
+} from '../constants';

@@ -3,6 +3,11 @@
  */
 
 import type { RoleConfig } from '../types';
+import {
+  orgAdminRole,
+  orgMemberRole,
+  orgOwnerRole,
+} from './org-roles';
 import { superAdminRole } from './super-admin';
 import { userRole } from './user';
 
@@ -10,7 +15,16 @@ import { userRole } from './user';
 export const roles: RoleConfig[] = [
   superAdminRole,
   userRole,
-  // 扩展时在此添加更多角色
+  // 组织角色
+  orgOwnerRole,
+  orgAdminRole,
+  orgMemberRole,
 ];
 
-export { superAdminRole, userRole };
+export {
+  orgAdminRole,
+  orgMemberRole,
+  orgOwnerRole,
+  superAdminRole,
+  userRole,
+};

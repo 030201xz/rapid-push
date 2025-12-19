@@ -3,7 +3,6 @@
  *
  * 包含热更新服务的所有模块：
  * - organizations: 组织管理
- * - organizationMembers: 组织成员管理
  * - projects: 项目管理
  * - channels: 渠道管理 + 代码签名
  * - assets: 资源文件管理
@@ -18,7 +17,6 @@ import { router } from '@/common/trpc';
 import { assetsRouter } from './assets';
 import { channelsRouter } from './channels';
 import { directivesRouter } from './directives';
-import { organizationMembersRouter } from './organization-members';
 import { organizationsRouter } from './organizations';
 import { projectsRouter } from './projects';
 import { rolloutRulesRouter } from './rollout-rules';
@@ -27,7 +25,6 @@ import { updatesRouter } from './updates';
 // ========== Hot Update 域路由聚合 ==========
 export const hotUpdateRouter = router({
   organizations: organizationsRouter,
-  organizationMembers: organizationMembersRouter,
   projects: projectsRouter,
   channels: channelsRouter,
   assets: assetsRouter,
@@ -40,10 +37,6 @@ export const hotUpdateRouter = router({
 export { assetsRouter, AssetsTypes } from './assets';
 export { channelsRouter, ChannelsTypes } from './channels';
 export { directivesRouter, DirectivesTypes } from './directives';
-export {
-  organizationMembersRouter,
-  OrganizationMembersTypes,
-} from './organization-members';
 export {
   organizationsRouter,
   OrganizationsTypes,
@@ -59,10 +52,6 @@ export { updatesRouter, UpdatesTypes } from './updates';
 export { assets } from './assets';
 export { channels } from './channels';
 export { DIRECTIVE_TYPE, directives } from './directives';
-export {
-  MEMBER_ROLE,
-  organizationMembers,
-} from './organization-members';
 export { organizations } from './organizations';
 export { projects } from './projects';
 export { ROLLOUT_RULE_TYPE, rolloutRules } from './rollout-rules';

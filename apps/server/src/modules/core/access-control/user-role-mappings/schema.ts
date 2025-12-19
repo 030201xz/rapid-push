@@ -3,6 +3,7 @@
  *
  * 核心设计:
  * - 多对多关系：一个用户可以拥有多个角色
+ * - 支持作用域控制：global | organization | project
  * - 支持角色有效期控制
  * - 支持角色撤销（软删除）
  * - 记录角色分配人和分配原因
@@ -13,8 +14,8 @@
  * - assignedBy -> users.id (SET NULL, 可选)
  */
 
-import { relations } from 'drizzle-orm';
 import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
+import { relations } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -22,9 +23,11 @@ import {
   timestamp,
   unique,
   uuid,
+  varchar,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { users } from '../../identify/users/schema';
+import { SCOPE_TYPE } from '../constants';
 import { roles } from '../roles/schema';
 
 // ========== 表定义 ==========
@@ -40,6 +43,12 @@ export const userRoleMappings = appSchema.table(
     roleId: uuid('role_id')
       .notNull()
       .references(() => roles.id, { onDelete: 'cascade' }),
+    /** 作用域类型: global | organization | project */
+    scopeType: varchar('scope_type', { length: 20 })
+      .notNull()
+      .default(SCOPE_TYPE.GLOBAL),
+    /** 作用域 ID (organization_id / project_id)，global 时为 null */
+    scopeId: uuid('scope_id'),
     /** 角色生效时间 */
     effectiveFrom: timestamp('effective_from').notNull().defaultNow(),
     /** 角色失效时间 (null 表示永久有效) */
@@ -56,17 +65,27 @@ export const userRoleMappings = appSchema.table(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   t => [
-    // (userId, roleId) 联合唯一约束 (同一用户同一角色只能有一条有效记录)
-    unique('uq_user_role_active').on(t.userId, t.roleId),
+    // (userId, roleId, scopeType, scopeId) 联合唯一约束
+    unique('uq_user_role_scope').on(
+      t.userId,
+      t.roleId,
+      t.scopeType,
+      t.scopeId
+    ),
     // 为 userId 建立索引，优化用户角色查询
     index('idx_user_role_mappings_user_id').on(t.userId),
     // 为 roleId 建立索引，优化角色用户查询
     index('idx_user_role_mappings_role_id').on(t.roleId),
+    // 为作用域建立索引，优化组织/项目成员查询
+    index('idx_user_role_mappings_scope').on(t.scopeType, t.scopeId),
     // 为有效期建立索引，优化过期角色查询
-    index('idx_user_role_mappings_effective').on(t.effectiveFrom, t.effectiveTo),
+    index('idx_user_role_mappings_effective').on(
+      t.effectiveFrom,
+      t.effectiveTo
+    ),
     // 为撤销状态建立索引，优化有效角色查询
     index('idx_user_role_mappings_is_revoked').on(t.isRevoked),
-  ],
+  ]
 );
 
 // ========== Relations 定义 ==========
@@ -88,7 +107,7 @@ export const userRoleMappingsRelations = relations(
       fields: [userRoleMappings.assignedBy],
       references: [users.id],
     }),
-  }),
+  })
 );
 
 // ========== Zod Schema（自动派生） ==========

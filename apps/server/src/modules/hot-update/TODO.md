@@ -4,80 +4,59 @@
 
 ## 模块概览
 
-| 模块                 | 状态      | 说明                                 |
-| -------------------- | --------- | ------------------------------------ |
-| organizations        | ✅ 已完成 | 组织管理                             |
-| organization-members | ✅ 已完成 | 用户-组织多对多关联                  |
-| projects             | ✅ 已完成 | 项目管理（依赖 organizations）       |
-| channels             | ✅ 已完成 | 渠道管理 + 代码签名（依赖 projects） |
-| assets               | ✅ 已完成 | 资源文件（内容寻址存储）             |
-| updates              | ✅ 已完成 | 更新发布（依赖 channels）            |
-| update-assets        | ✅ 已完成 | 更新-资源关联表                      |
-| directives           | ✅ 已完成 | 指令管理（依赖 channels）            |
-| rollout-rules        | ✅ 已完成 | 灰度规则（依赖 updates）             |
+| 模块          | 状态      | 说明                                 |
+| ------------- | --------- | ------------------------------------ |
+| organizations | ✅ 已完成 | 组织管理                             |
+| projects      | ✅ 已完成 | 项目管理（依赖 organizations）       |
+| channels      | ✅ 已完成 | 渠道管理 + 代码签名（依赖 projects） |
+| assets        | ✅ 已完成 | 资源文件（内容寻址存储）             |
+| updates       | ✅ 已完成 | 更新发布（依赖 channels）            |
+| update-assets | ✅ 已完成 | 更新-资源关联表                      |
+| directives    | ✅ 已完成 | 指令管理（依赖 channels）            |
+| rollout-rules | ✅ 已完成 | 灰度规则（依赖 updates）             |
 
-## 初始化脚本
+## 组织成员管理 (BREAKING CHANGE)
 
-| 任务                   | 状态      | 说明                                  |
-| ---------------------- | --------- | ------------------------------------- |
-| 0-env.ts ID 配置       | ✅ 已完成 | 添加 Organization/Project/Channel IDs |
-| 02-hot-update 配置目录 | ✅ 已完成 | 演示组织、项目、渠道配置              |
-| init-all.ts 更新       | ✅ 已完成 | 集成热更新模块初始化                  |
+**已废弃**: `organization-members` 模块
+
+**新方案**: 通过 `core/access-control/user-role-mappings` + scope 统一管理
+
+### 设计要点
+
+1. `user_role_mappings` 表新增 `scopeType` + `scopeId` 字段
+2. 组织角色: `org:owner`, `org:admin`, `org:member`
+3. 角色分配时指定 `scopeType='organization'` + `scopeId=organizationId`
+
+### API 迁移
+
+| 旧 API                          | 新 API                                                 |
+| ------------------------------- | ------------------------------------------------------ |
+| `organizationMembers.isMember`  | `userRoleMappings.isOrgMember(userId, organizationId)` |
+| `organizationMembers.isAdmin`   | `userRoleMappings.isOrgAdmin(userId, organizationId)`  |
+| `organizationMembers.add`       | `userRoleMappings.assignOrgRole(...)`                  |
+| `organizationMembers.listByOrg` | `userRoleMappings.listOrgMembers(organizationId)`      |
 
 ## 数据模型关系
 
 ```
 users (已有)
   │
-  └──▶ organization_members ←──▶ organizations
-                                     │
-                                     └──▶ projects
-                                             │
-                                             └──▶ channels
-                                                     │
-                                                     ├──▶ updates
-                                                     │       │
-                                                     │       ├──▶ update_assets ←──▶ assets
-                                                     │       │
-                                                     │       └──▶ rollout_rules
-                                                     │
-                                                     └──▶ directives
+  └──▶ user_role_mappings (scopeType='organization')
+         │
+         └──▶ organizations
+                  │
+                  └──▶ projects
+                          │
+                          └──▶ channels
+                                  │
+                                  ├──▶ updates
+                                  │       │
+                                  │       ├──▶ update_assets ←──▶ assets
+                                  │       │
+                                  │       └──▶ rollout_rules
+                                  │
+                                  └──▶ directives
 ```
-
-## 开发顺序
-
-### 第一批（基础层）
-
-- [ ] organizations - 无外部依赖
-- [ ] assets - 无外部依赖
-
-### 第二批（依赖组织）
-
-- [ ] organization-members - 依赖 organizations + users
-- [ ] projects - 依赖 organizations
-
-### 第三批（依赖项目）
-
-- [ ] channels - 依赖 projects
-
-### 第四批（依赖渠道）
-
-- [ ] updates - 依赖 channels
-- [ ] directives - 依赖 channels
-
-### 第五批（依赖更新）
-
-- [ ] update-assets - 依赖 updates + assets
-- [ ] rollout-rules - 依赖 updates
-
----
-
-## 开发日志
-
-### 2025-12-19
-
-- 创建模块结构和 TODO.md
-- 开始开发...
 
 ## 对话记录
 

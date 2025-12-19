@@ -21,18 +21,22 @@ export type AppRouter = typeof appRouter;
 
 // ========== 重导出各域类型命名空间 ==========
 export {
+  ORG_ADMIN_ROLES,
+  ORG_ROLE_CODE,
   PermissionsTypes,
   RolePermissionMappingsTypes,
   RolesTypes,
+  SCOPE_TYPE,
   UserRoleMappingsTypes,
   UsersTypes,
+  type OrgRoleCode,
+  type ScopeType,
 } from './core';
 
 export {
   AssetsTypes,
   ChannelsTypes,
   DirectivesTypes,
-  OrganizationMembersTypes,
   OrganizationsTypes,
   ProjectsTypes,
   RolloutRulesTypes,
