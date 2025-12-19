@@ -2,9 +2,9 @@
  * Hot Update 初始化配置汇总导出
  */
 
-import { channels } from './03-channels';
 import { organizations } from './01-organizations';
 import { projects } from './02-projects';
+import { channels } from './03-channels';
 import type { HotUpdateInitConfig } from './types';
 
 /** 完整初始化配置 */

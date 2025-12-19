@@ -76,10 +76,16 @@ function createHotUpdateIdMaps(): HotUpdateIdMaps {
       ][]
     ),
     projects: new Map(
-      Object.entries(ProjectIds) as [keyof typeof ProjectIds, string][]
+      Object.entries(ProjectIds) as [
+        keyof typeof ProjectIds,
+        string
+      ][]
     ),
     channels: new Map(
-      Object.entries(ChannelIds) as [keyof typeof ChannelIds, string][]
+      Object.entries(ChannelIds) as [
+        keyof typeof ChannelIds,
+        string
+      ][]
     ),
   };
 }
@@ -328,7 +334,8 @@ async function insertProjects(
   for (const project of hotUpdateConfig.projects) {
     const { key, organizationKey, ...data } = project;
     const id = hotUpdateIdMaps.projects.get(key);
-    const organizationId = hotUpdateIdMaps.organizations.get(organizationKey);
+    const organizationId =
+      hotUpdateIdMaps.organizations.get(organizationKey);
 
     if (!id) {
       logger.error(`项目 ID 未定义: ${key}，请在 0-env.ts 中配置`);

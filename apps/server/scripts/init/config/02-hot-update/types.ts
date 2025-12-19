@@ -20,7 +20,10 @@ import type {
 
 /** 组织配置 - 基于 NewOrganization 类型 */
 export interface OrganizationConfig
-  extends Omit<NewOrganization, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'> {
+  extends Omit<
+    NewOrganization,
+    'id' | 'ownerId' | 'createdAt' | 'updatedAt'
+  > {
   /** 配置唯一标识 */
   key: OrganizationKey;
   /** 所有者用户 key（引用 UserIds） */
