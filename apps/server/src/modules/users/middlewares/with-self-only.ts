@@ -11,7 +11,7 @@
 import { TRPCError } from '@trpc/server';
 import { middleware } from '../../../common/trpc';
 import type { User } from '../schema';
-import type { AuthUser } from '../../../types';
+import type { AuthUser } from '@/types/index';
 
 /**
  * 所有权检查中间件

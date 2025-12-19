@@ -5,7 +5,7 @@
 
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
 import { env } from '../env';
-import type { AuthUser } from '../../types';
+import type { AuthUser } from '@/types/index';
 
 // ========== JWT 配置 ==========
 const JWT_ALG = 'HS256';
