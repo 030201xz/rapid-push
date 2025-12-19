@@ -5,16 +5,20 @@
  */
 
 // ========== Schema 类型 ==========
-export type { Role, NewRole, UpdateRole } from './schema';
+export type { NewRole, Role, UpdateRole } from './schema';
 
 // ========== Zod Schema（前端可复用验证） ==========
-export { insertRoleSchema, updateRoleSchema, selectRoleSchema } from './schema';
+export {
+  insertRoleSchema,
+  selectRoleSchema,
+  updateRoleSchema,
+} from './schema';
 
 // ========== Service 返回类型 ==========
 export type {
-  ListRolesResult,
-  GetRoleResult,
   CreateRoleResult,
-  UpdateRoleResult,
   DeleteRoleResult,
+  GetRoleResult,
+  ListRolesResult,
+  UpdateRoleResult,
 } from './service';

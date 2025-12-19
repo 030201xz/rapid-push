@@ -4,9 +4,9 @@
  */
 
 import type { Context as HonoContext } from 'hono';
-import { getDb } from '../database/postgresql/rapid-s';
+import type { AuthUser, BaseContext } from '../../types/index';
 import { verifyToken } from '../auth';
-import type { AuthUser, BaseContext } from '../../types';
+import { getDb } from '../database/postgresql/rapid-s';
 
 // ========== Context 创建函数 ==========
 export function createContext(c: HonoContext): BaseContext {
@@ -17,7 +17,7 @@ export function createContext(c: HonoContext): BaseContext {
     getUser: async (): Promise<AuthUser | null> => {
       const authHeader = c.req.header('Authorization');
       if (!authHeader?.startsWith('Bearer ')) return null;
-      
+
       const token = authHeader.slice(7); // 移除 "Bearer " 前缀
       return verifyToken(token);
     },

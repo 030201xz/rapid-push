@@ -1,27 +1,45 @@
 /**
  * 认证相关 Context 类型
+ *
+ * 设计说明:
+ * - AuthUser 直接从 User 类型 Pick，确保类型安全
+ * - 角色信息从 Role 类型推断，通过 user_role_mappings 表查询后附加
  */
 
-import type { User } from '../../modules/users/schema';
+import type { Role } from '../../modules/core/access-control/roles/schema';
+import type { User } from '../../modules/core/identify/users/schema';
 import type { BaseContext } from './base';
 
-// ========== 用户认证信息 ==========
+// ========== 认证用户字段选择 ==========
 
-/** 从 User 类型 Pick 关键字段 */
-export type AuthUser = Pick<User, 'id' | 'email' | 'role'>;
+/** AuthUser 需要的字段（从 User 表 Pick） */
+type AuthUserFields = Pick<
+  User,
+  | 'id'
+  | 'username'
+  | 'nickname'
+  | 'email'
+  | 'phone'
+  | 'avatarUrl'
+  | 'status'
+>;
+
+/** 认证用户信息（User 字段 + 角色列表） */
+export type AuthUser = AuthUserFields & {
+  /** 用户关联的角色 code 列表（通过 user_role_mappings 查询） */
+  roles: Role['code'][];
+};
 
 // ========== 认证后 Context ==========
 
 /** 已认证上下文（ctx.user 存在） */
 export interface AuthContext extends BaseContext {
-  /** 已认证用户 */
   user: AuthUser;
 }
 
 // ========== 管理员 Context ==========
 
-/** 管理员上下文（role 已收窄为 admin） */
+/** 管理员上下文（roles 包含 admin） */
 export interface AdminContext extends BaseContext {
-  /** 管理员用户 */
-  user: AuthUser & { role: 'admin' };
+  user: AuthUser & { roles: ['admin', ...Role['code'][]] };
 }

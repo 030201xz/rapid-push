@@ -6,7 +6,7 @@
  */
 
 import { and, eq, isNull } from 'drizzle-orm';
-import type { RapidSDatabase as Database } from '../../common/database/postgresql/rapid-s';
+import type { RapidSDatabase as Database } from '../../../../common/database/postgresql/rapid-s';
 import { permissions, type NewPermission, type UpdatePermission } from './schema';
 
 // ========== 查询操作 ==========

@@ -1,13 +1,13 @@
-import { Hono } from 'hono';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { createContext } from './common/trpc';
-import { appRouter } from './modules';
+import { Hono } from 'hono';
 import {
   corsMiddleware,
-  loggerMiddleware,
   errorHandler,
+  loggerMiddleware,
   requestIdMiddleware,
 } from './common/middlewares';
+import { createContext } from './common/trpc';
+import { appRouter } from './modules';
 import type { AppEnv } from './types/index';
 
 // ========== Hono 应用（强类型环境） ==========
@@ -20,7 +20,7 @@ app.use('*', loggerMiddleware); // 日志
 app.use('*', corsMiddleware); // CORS
 
 // ========== tRPC 挂载 ==========
-app.all('/trpc/*', (c) =>
+app.all('/trpc/*', c =>
   fetchRequestHandler({
     endpoint: '/trpc',
     req: c.req.raw,
@@ -30,7 +30,7 @@ app.all('/trpc/*', (c) =>
 );
 
 // ========== 健康检查 ==========
-app.get('/health', (c) =>
+app.get('/health', c =>
   c.json({
     status: 'ok',
     requestId: c.get('requestId'),
@@ -38,7 +38,7 @@ app.get('/health', (c) =>
 );
 
 // ========== 根路径 ==========
-app.get('/', (c) =>
+app.get('/', c =>
   c.json({
     name: 'Rapid-S Server',
     version: '1.0.0',

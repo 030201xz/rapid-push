@@ -4,9 +4,9 @@
  */
 
 import { TRPCError } from '@trpc/server';
+import type { AuthContext } from '../../../types/index';
 import { t } from '../init';
 import { baseProcedure } from './base';
-import type { AuthContext } from '../../../types';
 
 // ========== 认证中间件 ==========
 const isAuthed = t.middleware(async ({ ctx, next }) => {

@@ -6,7 +6,7 @@
  */
 
 import { and, eq, gt, isNull, lt, or } from 'drizzle-orm';
-import type { RapidSDatabase as Database } from '../../common/database/postgresql/rapid-s';
+import type { RapidSDatabase as Database } from '../../../../common/database/postgresql/rapid-s';
 import {
   userRoleMappings,
   type NewUserRoleMapping,

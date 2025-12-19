@@ -13,6 +13,7 @@
  * - (userId, roleId) 组合唯一（未撤销的记录）
  */
 
+import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
 import {
   boolean,
   index,
@@ -21,7 +22,6 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
-import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
 
 // ========== 表定义 ==========
 export const userRoleMappings = appSchema.table(
@@ -53,17 +53,20 @@ export const userRoleMappings = appSchema.table(
     // 为 (userId, roleId) 建立索引，防止重复分配
     index('idx_user_role_mappings_user_role').on(t.userId, t.roleId),
     // 为有效期建立索引，优化过期角色查询
-    index('idx_user_role_mappings_effective').on(t.effectiveFrom, t.effectiveTo),
+    index('idx_user_role_mappings_effective').on(
+      t.effectiveFrom,
+      t.effectiveTo
+    ),
     // 为撤销状态建立索引，优化有效角色查询
     index('idx_user_role_mappings_is_revoked').on(t.isRevoked),
-  ],
+  ]
 );
 
 // ========== Zod Schema（自动派生） ==========
 
 /** 创建用户角色映射 Schema */
 export const insertUserRoleMappingSchema = createInsertSchema(
-  userRoleMappings,
+  userRoleMappings
 ).omit({
   id: true,
   isRevoked: true,
@@ -72,7 +75,9 @@ export const insertUserRoleMappingSchema = createInsertSchema(
 });
 
 /** 更新用户角色映射 Schema */
-export const updateUserRoleMappingSchema = createInsertSchema(userRoleMappings)
+export const updateUserRoleMappingSchema = createInsertSchema(
+  userRoleMappings
+)
   .pick({
     effectiveTo: true,
     assignReason: true,
@@ -80,7 +85,8 @@ export const updateUserRoleMappingSchema = createInsertSchema(userRoleMappings)
   .partial();
 
 /** 查询用户角色映射 Schema */
-export const selectUserRoleMappingSchema = createSelectSchema(userRoleMappings);
+export const selectUserRoleMappingSchema =
+  createSelectSchema(userRoleMappings);
 
 // ========== 类型导出（从表定义推导） ==========
 export type UserRoleMapping = typeof userRoleMappings.$inferSelect;

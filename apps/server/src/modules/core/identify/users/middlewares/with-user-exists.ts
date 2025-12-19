@@ -8,7 +8,7 @@
  */
 
 import { TRPCError } from '@trpc/server';
-import { middleware } from '../../../common/trpc';
+import { middleware } from '../../../../../common/trpc';
 import type { User } from '../schema';
 import * as userService from '../service';
 

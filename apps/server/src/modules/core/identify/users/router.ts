@@ -10,7 +10,7 @@ import {
   protectedProcedure,
   adminProcedure,
   router,
-} from '../../common/trpc';
+} from '../../../../common/trpc';
 import { insertUserSchema, updateUserSchema } from './schema';
 import * as userService from './service';
 import { withUserExists, withSelfOnly } from './middlewares';

@@ -5,7 +5,11 @@
  */
 
 import { z } from 'zod';
-import { adminProcedure, publicProcedure, router } from '../../common/trpc';
+import {
+  adminProcedure,
+  publicProcedure,
+  router,
+} from '../../../../common/trpc';
 import { insertRolePermissionMappingSchema } from './schema';
 import * as mappingService from './service';
 
@@ -21,21 +25,25 @@ export const rolePermissionMappingsRouter = router({
   byRole: publicProcedure
     .input(roleIdSchema)
     .query(({ ctx, input }) =>
-      mappingService.getRolePermissions(ctx.db, input.roleId),
+      mappingService.getRolePermissions(ctx.db, input.roleId)
     ),
 
   /** 获取拥有某权限的所有角色 */
   byPermission: publicProcedure
     .input(permissionIdSchema)
     .query(({ ctx, input }) =>
-      mappingService.getPermissionRoles(ctx.db, input.permissionId),
+      mappingService.getPermissionRoles(ctx.db, input.permissionId)
     ),
 
   /** 检查角色是否拥有某权限 */
   hasPermission: publicProcedure
     .input(roleIdSchema.extend(permissionIdSchema.shape))
     .query(({ ctx, input }) =>
-      mappingService.hasPermission(ctx.db, input.roleId, input.permissionId),
+      mappingService.hasPermission(
+        ctx.db,
+        input.roleId,
+        input.permissionId
+      )
     ),
 
   // ========== 管理员路由 ==========
@@ -43,7 +51,7 @@ export const rolePermissionMappingsRouter = router({
   assign: adminProcedure
     .input(insertRolePermissionMappingSchema)
     .mutation(({ ctx, input }) =>
-      mappingService.assignPermission(ctx.db, input),
+      mappingService.assignPermission(ctx.db, input)
     ),
 
   /** 批量为角色分配权限（仅管理员） */
@@ -51,21 +59,21 @@ export const rolePermissionMappingsRouter = router({
     .input(
       roleIdSchema.extend({
         permissionIds: z.array(z.uuid()),
-      }),
+      })
     )
     .mutation(({ ctx, input }) =>
       mappingService.assignPermissions(
         ctx.db,
         input.roleId,
-        input.permissionIds,
-      ),
+        input.permissionIds
+      )
     ),
 
   /** 移除映射（仅管理员） */
   remove: adminProcedure
     .input(mappingIdSchema)
     .mutation(({ ctx, input }) =>
-      mappingService.removeMapping(ctx.db, input.id),
+      mappingService.removeMapping(ctx.db, input.id)
     ),
 
   /** 移除角色的某个权限（仅管理员） */
@@ -75,14 +83,14 @@ export const rolePermissionMappingsRouter = router({
       mappingService.removeRolePermission(
         ctx.db,
         input.roleId,
-        input.permissionId,
-      ),
+        input.permissionId
+      )
     ),
 
   /** 移除角色的所有权限（仅管理员） */
   removeAllRolePermissions: adminProcedure
     .input(roleIdSchema)
     .mutation(({ ctx, input }) =>
-      mappingService.removeAllRolePermissions(ctx.db, input.roleId),
+      mappingService.removeAllRolePermissions(ctx.db, input.roleId)
     ),
 });

@@ -6,7 +6,7 @@
  */
 
 import { and, eq } from 'drizzle-orm';
-import type { RapidSDatabase as Database } from '../../common/database/postgresql/rapid-s';
+import type { RapidSDatabase as Database } from '../../../../common/database/postgresql/rapid-s';
 import { roles, type NewRole, type UpdateRole } from './schema';
 
 // ========== 查询操作 ==========
@@ -44,7 +44,11 @@ export async function createRole(db: Database, data: NewRole) {
 }
 
 /** 更新角色 */
-export async function updateRole(db: Database, id: string, data: UpdateRole) {
+export async function updateRole(
+  db: Database,
+  id: string,
+  data: UpdateRole
+) {
   const result = await db
     .update(roles)
     .set({ ...data, updatedAt: new Date() })

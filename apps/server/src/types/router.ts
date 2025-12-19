@@ -3,7 +3,10 @@
  * 从 AppRouter 自动推导所有路由的 Input/Output 类型
  */
 
-import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
+import type {
+  inferRouterInputs,
+  inferRouterOutputs,
+} from '@trpc/server';
 import type { AppRouter } from '../modules';
 
 // ========== 路由类型推导 ==========

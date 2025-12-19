@@ -4,7 +4,7 @@
 
 import { createMiddleware } from 'hono/factory';
 import { apiLogger } from '../logger';
-import type { AppEnv } from '../../types';
+import type { AppEnv } from '../../types/index';
 
 export const loggerMiddleware = createMiddleware<AppEnv>(async (c, next) => {
   const start = performance.now();
