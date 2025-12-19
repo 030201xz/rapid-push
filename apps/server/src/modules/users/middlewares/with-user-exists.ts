@@ -15,14 +15,14 @@ import * as userService from '../service';
 /**
  * 用户存在性检查中间件
  *
- * - 要求 input 包含 id: number
+ * - 要求 input 包含 id: string (UUID)
  * - 扩展 ctx.targetUser（User 类型）
  *
  * tRPC 原生中间件：类型自动从 procedure 链推断
  */
 export const withUserExists = middleware(async ({ ctx, input, next }) => {
-  // 类型断言：中间件依赖 .input(z.object({ id: z.number() })) 已在 procedure 中定义
-  const { id } = input as { id: number };
+  // 类型断言：中间件依赖 .input(z.object({ id: z.string().uuid() })) 已在 procedure 中定义
+  const { id } = input as { id: string };
 
   const targetUser = await userService.getUserById(ctx.db, id);
 

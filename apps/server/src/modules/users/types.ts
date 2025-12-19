@@ -5,7 +5,16 @@
  */
 
 // ========== Schema 类型 ==========
-export type { User, NewUser, UpdateUser } from './schema';
+export type {
+  User,
+  NewUser,
+  UpdateUser,
+  UserStatus,
+  Gender,
+} from './schema';
+
+// ========== 常量导出 ==========
+export { USER_STATUS, GENDER } from './schema';
 
 // ========== Zod Schema（前端可复用验证） ==========
 export { insertUserSchema, updateUserSchema, selectUserSchema } from './schema';
