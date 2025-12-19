@@ -8,6 +8,7 @@ import {
 } from './common/middlewares';
 import { createContext } from './common/trpc';
 import { appRouter } from './modules';
+import { registerAssetRoutes } from './modules/hot-update/storage/assets/http';
 import type { AppEnv } from './types/index';
 
 // ========== Hono 应用（强类型环境） ==========
@@ -36,6 +37,9 @@ app.get('/health', c =>
     requestId: c.get('requestId'),
   })
 );
+
+// ========== 资源下载路由（Expo Updates 协议） ==========
+registerAssetRoutes(app);
 
 // ========== 根路径 ==========
 app.get('/', c =>
