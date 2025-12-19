@@ -7,15 +7,13 @@
  * - 会话可以关联多个 Refresh Token (Token 轮换机制)
  * - 记录登录设备和 IP 信息
  * - 撤销会话时同步撤销所有关联的 RT
- *
- * 约束 (应用层保证):
- * - userId 必须存在于 users 表
- * - sessionId 必须全局唯一
  */
 
 import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
+import { relations } from 'drizzle-orm';
 import {
   boolean,
+  foreignKey,
   index,
   text,
   timestamp,
@@ -23,6 +21,8 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { users } from '../../users/schema';
+import { userDevices } from './devices.schema';
 
 // ========== 表定义 ==========
 export const userSessions = appSchema.table(
@@ -71,7 +71,39 @@ export const userSessions = appSchema.table(
     index('idx_user_sessions_expires_at').on(t.expiresAt),
     // 活跃度排序
     index('idx_user_sessions_last_activity_at').on(t.lastActivityAt),
+    // ========== 外键约束 ==========
+    foreignKey({
+      columns: [t.userId],
+      foreignColumns: [users.id],
+      name: 'fk_user_sessions_user_id',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [t.deviceId],
+      foreignColumns: [userDevices.id],
+      name: 'fk_user_sessions_device_id',
+    }).onDelete('set null'),
   ]
+);
+
+// ========== Relations 定义 ==========
+import { userRefreshTokens } from './refresh-tokens.schema';
+
+export const userSessionsRelations = relations(
+  userSessions,
+  ({ one, many }) => ({
+    /** 所属用户 */
+    user: one(users, {
+      fields: [userSessions.userId],
+      references: [users.id],
+    }),
+    /** 登录设备 */
+    device: one(userDevices, {
+      fields: [userSessions.deviceId],
+      references: [userDevices.id],
+    }),
+    /** 关联的刷新令牌 */
+    refreshTokens: many(userRefreshTokens),
+  })
 );
 
 // ========== Zod Schema ==========

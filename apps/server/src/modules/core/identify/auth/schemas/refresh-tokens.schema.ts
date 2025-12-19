@@ -20,8 +20,10 @@
  */
 
 import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
+import { relations } from 'drizzle-orm';
 import {
   boolean,
+  foreignKey,
   index,
   integer,
   text,
@@ -30,6 +32,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { userSessions } from './sessions.schema';
 
 // ========== 表定义 ==========
 export const userRefreshTokens = appSchema.table(
@@ -95,7 +98,38 @@ export const userRefreshTokens = appSchema.table(
       t.isRevoked,
       t.expiresAt
     ),
+    // ========== 外键约束 ==========
+    // sessionId 是 varchar，引用 user_sessions.session_id（业务唯一键）
+    foreignKey({
+      columns: [t.sessionId],
+      foreignColumns: [userSessions.sessionId],
+      name: 'fk_refresh_tokens_session_id',
+    }).onDelete('cascade'),
+    // 自引用外键：父 Token
+    foreignKey({
+      columns: [t.parentTokenId],
+      foreignColumns: [t.id],
+      name: 'fk_refresh_tokens_parent_token_id',
+    }).onDelete('set null'),
   ]
+);
+
+// ========== Relations 定义 ==========
+export const userRefreshTokensRelations = relations(
+  userRefreshTokens,
+  ({ one }) => ({
+    /** 所属会话 */
+    session: one(userSessions, {
+      fields: [userRefreshTokens.sessionId],
+      references: [userSessions.sessionId],
+    }),
+    /** 父 Token（轮换来源） */
+    parentToken: one(userRefreshTokens, {
+      fields: [userRefreshTokens.parentTokenId],
+      references: [userRefreshTokens.id],
+      relationName: 'tokenChain',
+    }),
+  })
 );
 
 // ========== Zod Schema ==========

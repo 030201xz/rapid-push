@@ -5,15 +5,13 @@
  * - 记录用户登录使用的设备信息
  * - 支持设备信任机制 (可信设备可跳过部分验证)
  * - 用于多设备管理和安全审计
- *
- * 约束 (应用层保证):
- * - 同一用户下 deviceFingerprint 唯一
- * - 设备标识由客户端生成并保持稳定
  */
 
 import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
+import { relations } from 'drizzle-orm';
 import {
   boolean,
+  foreignKey,
   index,
   text,
   timestamp,
@@ -21,6 +19,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { users } from '../../users/schema';
 import type { DeviceType } from '../constants';
 
 // ========== 表定义 ==========
@@ -79,7 +78,29 @@ export const userDevices = appSchema.table(
     index('idx_user_devices_last_active').on(t.lastActiveAt),
     // 设备状态查询
     index('idx_user_devices_status').on(t.userId, t.isDisabled),
+    // ========== 外键约束 ==========
+    foreignKey({
+      columns: [t.userId],
+      foreignColumns: [users.id],
+      name: 'fk_user_devices_user_id',
+    }).onDelete('cascade'),
   ]
+);
+
+// ========== Relations 定义 ==========
+import { userSessions } from './sessions.schema';
+
+export const userDevicesRelations = relations(
+  userDevices,
+  ({ one, many }) => ({
+    /** 所属用户 */
+    user: one(users, {
+      fields: [userDevices.userId],
+      references: [users.id],
+    }),
+    /** 使用此设备的会话 */
+    sessions: many(userSessions),
+  })
 );
 
 // ========== Zod Schema ==========
