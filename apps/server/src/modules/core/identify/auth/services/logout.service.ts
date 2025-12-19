@@ -98,8 +98,9 @@ export async function logoutSession(
  * 1. 撤销用户的所有活跃会话 (PostgreSQL)
  * 2. 撤销所有关联的 RT (PostgreSQL)
  * 3. 将当前 AT 加入黑名单 (Redis)
- * 4. 清空用户活跃会话列表 (Redis)
- * 5. 使所有 Session 缓存失效 (Redis)
+ * 4. 将所有 Session 加入撤销列表 (Redis) - 确保其他设备的 AT 也失效
+ * 5. 清空用户活跃会话列表 (Redis)
+ * 6. 使所有 Session 缓存失效 (Redis)
  */
 export async function logoutAllSessions(
   db: Database,
@@ -118,7 +119,7 @@ export async function logoutAllSessions(
     REVOKE_REASON.USER_LOGOUT
   );
 
-  // 3. 撤销所有会话的 RT (PostgreSQL)
+  // 3. 撤销所有会话的 RT (PostgreSQL) 并使缓存失效
   let totalRevokedTokens = 0;
   for (const session of activeSessions) {
     const count = await refreshTokenService.revokeAllSessionTokens(
@@ -128,17 +129,22 @@ export async function logoutAllSessions(
     );
     totalRevokedTokens += count;
 
-    // 4. 使每个 Session 缓存失效 (Redis)
+    // 使每个 Session 缓存失效 (Redis)
     await redisService.invalidateSessionCache(
       redis,
       session.sessionId
     );
   }
 
-  // 5. 将当前 AT 加入黑名单 (Redis)
+  // 4. 将当前 AT 加入黑名单 (Redis)
   if (currentAtJti) {
     await redisService.blacklistAccessToken(redis, currentAtJti);
   }
+
+  // 5. 将所有 Session 加入撤销列表 (Redis)
+  // 确保其他设备的 AT 在验证时也会被拒绝
+  const sessionIds = activeSessions.map(s => s.sessionId);
+  await redisService.revokeMultipleSessions(redis, sessionIds);
 
   // 6. 清空用户活跃会话列表 (Redis)
   await redisService.clearUserActiveSessions(redis, userId);

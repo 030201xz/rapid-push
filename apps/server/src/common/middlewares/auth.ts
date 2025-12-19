@@ -1,7 +1,7 @@
 /**
  * Auth 认证中间件
  *
- * 提供完整的 Token 验证（包含黑名单检查）
+ * 提供完整的 Token 验证（包含黑名单检查和 Session 撤销检查）
  * 供其他模块使用，实现统一的认证逻辑
  */
 
@@ -10,6 +10,7 @@ import { getGlobalRedisClient } from '@/common/database/redis/rapid-s';
 import {
   AUTH_ERROR_CODE,
   REDIS_AT_BLACKLIST_PREFIX,
+  REDIS_SESSION_REVOKED_PREFIX,
 } from '@/modules/core/identify/auth/constants';
 import type { AuthUser } from '@/types/index';
 import type { Context as HonoContext, Next } from 'hono';
@@ -35,7 +36,7 @@ export interface FullVerifyResult {
 }
 
 // ============================================================================
-// 黑名单检查 (内联实现，避免循环依赖)
+// 黑名单与撤销检查 (内联实现，避免循环依赖)
 // ============================================================================
 
 /** 检查 AT 是否在黑名单中 */
@@ -44,6 +45,13 @@ async function isAccessTokenBlacklisted(
 ): Promise<boolean> {
   const redis = getGlobalRedisClient();
   const key = `${REDIS_AT_BLACKLIST_PREFIX}${jti}`;
+  return redis.exists(key);
+}
+
+/** 检查 Session 是否已被撤销 */
+async function isSessionRevoked(sessionId: string): Promise<boolean> {
+  const redis = getGlobalRedisClient();
+  const key = `${REDIS_SESSION_REVOKED_PREFIX}${sessionId}`;
   return redis.exists(key);
 }
 
@@ -57,7 +65,8 @@ async function isAccessTokenBlacklisted(
  * 包含：
  * 1. JWT 签名验证
  * 2. 过期时间检查
- * 3. 黑名单检查（Redis）
+ * 3. AT 黑名单检查（Redis）
+ * 4. Session 撤销状态检查（Redis）
  */
 export async function verifyAccessToken(
   token: string
@@ -69,7 +78,7 @@ export async function verifyAccessToken(
     return mapJwtError(jwtResult);
   }
 
-  // 2. 黑名单检查
+  // 2. AT 黑名单检查
   const isBlacklisted = await isAccessTokenBlacklisted(
     jwtResult.jti!
   );
@@ -79,6 +88,17 @@ export async function verifyAccessToken(
       valid: false,
       errorCode: AUTH_ERROR_CODE.TOKEN_REVOKED,
       errorMessage: 'Token 已被撤销，请重新登录',
+    };
+  }
+
+  // 3. Session 撤销状态检查（全设备登出时会撤销 Session）
+  const sessionRevoked = await isSessionRevoked(jwtResult.sessionId!);
+
+  if (sessionRevoked) {
+    return {
+      valid: false,
+      errorCode: AUTH_ERROR_CODE.SESSION_REVOKED,
+      errorMessage: '会话已被撤销，请重新登录',
     };
   }
 

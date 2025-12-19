@@ -17,8 +17,12 @@ const isAdmin = t.middleware(async ({ ctx, next }) => {
       message: '请先登录',
     });
   }
-  // 检查 roles 数组是否包含 admin
-  if (!auth.user.roles.includes('admin')) {
+  // 检查 roles 数组是否包含管理员角色（admin 或 super_admin）
+  const adminRoles = ['admin', 'super_admin'];
+  const hasAdminRole = auth.user.roles.some(role =>
+    adminRoles.includes(role)
+  );
+  if (!hasAdminRole) {
     throw new TRPCError({
       code: 'FORBIDDEN',
       message: '需要管理员权限',

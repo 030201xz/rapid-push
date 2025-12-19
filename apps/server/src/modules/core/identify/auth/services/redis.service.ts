@@ -17,6 +17,7 @@ import type { RedisClient } from '@/common/database/redis/rapid-s';
 import {
   AT_EXPIRES_IN_SECONDS,
   REDIS_AT_BLACKLIST_PREFIX,
+  REDIS_SESSION_REVOKED_PREFIX,
   REDIS_USER_SESSIONS_PREFIX,
   SESSION_EXPIRES_IN_SECONDS,
 } from '../constants';
@@ -38,6 +39,11 @@ export function getUserSessionsKey(userId: string): string {
 /** 生成 Session 缓存 Key */
 export function getSessionCacheKey(sessionId: string): string {
   return `auth:session:${sessionId}`;
+}
+
+/** 生成 Session 撤销列表 Key */
+export function getSessionRevokedKey(sessionId: string): string {
+  return `${REDIS_SESSION_REVOKED_PREFIX}${sessionId}`;
 }
 
 // ============================================================================
@@ -87,6 +93,56 @@ export async function blacklistMultipleTokens(
     pipeline.setex(key, AT_EXPIRES_IN_SECONDS, '1');
   }
   await pipeline.exec();
+}
+
+// ============================================================================
+// Session 撤销管理
+// ============================================================================
+
+/**
+ * 将 Session 加入撤销列表
+ *
+ * 当会话被撤销时调用，AT 验证时会检查 Session 是否在撤销列表中
+ * TTL 设置为 AT 的过期时间，因为 AT 过期后无需再检查
+ */
+export async function revokeSession(
+  redis: RedisClient,
+  sessionId: string
+): Promise<void> {
+  const key = getSessionRevokedKey(sessionId);
+  // 只需保留 AT 过期时间，AT 过期后此记录自动删除
+  await redis.set(key, '1', AT_EXPIRES_IN_SECONDS);
+}
+
+/**
+ * 批量将 Session 加入撤销列表
+ *
+ * 用于全设备登出时批量撤销会话
+ */
+export async function revokeMultipleSessions(
+  redis: RedisClient,
+  sessionIds: string[]
+): Promise<void> {
+  if (sessionIds.length === 0) return;
+  const pipeline = redis.redis.pipeline();
+  for (const sessionId of sessionIds) {
+    const key = getSessionRevokedKey(sessionId);
+    pipeline.setex(key, AT_EXPIRES_IN_SECONDS, '1');
+  }
+  await pipeline.exec();
+}
+
+/**
+ * 检查 Session 是否已被撤销
+ *
+ * 在验证 AT 时调用，如果 Session 已撤销则拒绝请求
+ */
+export async function isSessionRevoked(
+  redis: RedisClient,
+  sessionId: string
+): Promise<boolean> {
+  const key = getSessionRevokedKey(sessionId);
+  return redis.exists(key);
 }
 
 // ============================================================================

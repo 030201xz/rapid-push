@@ -28,6 +28,9 @@ export const SESSION_EXPIRES_IN_SECONDS =
 /** AT 黑名单前缀 (用于主动失效 AT) */
 export const REDIS_AT_BLACKLIST_PREFIX = 'auth:at:blacklist:';
 
+/** Session 撤销列表前缀 (用于标记已撤销的会话) */
+export const REDIS_SESSION_REVOKED_PREFIX = 'auth:session:revoked:';
+
 /** 用户活跃会话计数前缀 */
 export const REDIS_USER_SESSIONS_PREFIX = 'auth:user:sessions:';
 
