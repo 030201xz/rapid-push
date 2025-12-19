@@ -3,11 +3,18 @@
  * 清空全部初始化数据
  *
  * 按依赖顺序删除（逆序）：
- * 1. 用户角色映射 (user_role_mappings)
- * 2. 用户 (users)
- * 3. 角色权限映射 (role_permission_mappings)
- * 4. 角色 (roles)
- * 5. 权限 (permissions)
+ *
+ * Hot Update 模块（先删除，因为依赖 Core）:
+ * 1. 渠道 (channels) - 级联删除 updates, directives, rollout_rules
+ * 2. 项目 (projects)
+ * 3. 组织 (organizations)
+ *
+ * Core 模块:
+ * 4. 用户角色映射 (user_role_mappings)
+ * 5. 用户 (users)
+ * 6. 角色权限映射 (role_permission_mappings)
+ * 7. 角色 (roles)
+ * 8. 权限 (permissions)
  *
  * 运行方式: bun scripts/init/clean-all.ts
  */
@@ -17,8 +24,18 @@ import { rolePermissionMappings } from '@/modules/core/access-control/role-permi
 import { roles as rolesTable } from '@/modules/core/access-control/roles/schema';
 import { userRoleMappings } from '@/modules/core/access-control/user-role-mappings/schema';
 import { users as usersTable } from '@/modules/core/identify/users/schema';
+import { channels as channelsTable } from '@/modules/hot-update/channels/schema';
+import { organizations as organizationsTable } from '@/modules/hot-update/organizations/schema';
+import { projects as projectsTable } from '@/modules/hot-update/projects/schema';
 import { inArray } from 'drizzle-orm';
-import { PermissionIds, RoleIds, UserIds } from './0-env';
+import {
+  ChannelIds,
+  OrganizationIds,
+  PermissionIds,
+  ProjectIds,
+  RoleIds,
+  UserIds,
+} from './0-env';
 import { closeDbConnection, getDb, logger } from './_lib';
 
 // ============================================================================
@@ -101,6 +118,55 @@ async function deletePermissions(): Promise<number> {
 }
 
 // ============================================================================
+// Hot Update 数据删除函数
+// ============================================================================
+
+/** 删除渠道数据（级联删除 updates, directives 等） */
+async function deleteChannels(): Promise<number> {
+  const db = getDb();
+  const channelIds = Object.values(ChannelIds);
+
+  if (channelIds.length === 0) return 0;
+
+  const result = await db
+    .delete(channelsTable)
+    .where(inArray(channelsTable.id, channelIds))
+    .returning({ id: channelsTable.id });
+
+  return result.length;
+}
+
+/** 删除项目数据 */
+async function deleteProjects(): Promise<number> {
+  const db = getDb();
+  const projectIds = Object.values(ProjectIds);
+
+  if (projectIds.length === 0) return 0;
+
+  const result = await db
+    .delete(projectsTable)
+    .where(inArray(projectsTable.id, projectIds))
+    .returning({ id: projectsTable.id });
+
+  return result.length;
+}
+
+/** 删除组织数据 */
+async function deleteOrganizations(): Promise<number> {
+  const db = getDb();
+  const organizationIds = Object.values(OrganizationIds);
+
+  if (organizationIds.length === 0) return 0;
+
+  const result = await db
+    .delete(organizationsTable)
+    .where(inArray(organizationsTable.id, organizationIds))
+    .returning({ id: organizationsTable.id });
+
+  return result.length;
+}
+
+// ============================================================================
 // 主函数
 // ============================================================================
 
@@ -108,8 +174,25 @@ async function main(): Promise<void> {
   logger.info('开始清空初始化数据...\n');
 
   try {
-    // 按依赖逆序删除
     let count: number;
+
+    // ========== Hot Update 模块（先删除，因为有外键依赖 users） ==========
+    logger.info('========== Hot Update 模块 ==========');
+
+    logger.info('删除渠道...');
+    count = await deleteChannels();
+    logger.info(`  删除 ${count} 条渠道`);
+
+    logger.info('删除项目...');
+    count = await deleteProjects();
+    logger.info(`  删除 ${count} 条项目`);
+
+    logger.info('删除组织...');
+    count = await deleteOrganizations();
+    logger.info(`  删除 ${count} 条组织`);
+
+    // ========== Core 模块 ==========
+    logger.info('\n========== Core 模块 ==========');
 
     logger.info('删除用户角色映射...');
     count = await deleteUserRoleMappings();
