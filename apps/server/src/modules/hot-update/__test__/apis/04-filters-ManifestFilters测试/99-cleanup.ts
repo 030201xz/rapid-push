@@ -16,7 +16,7 @@ import {
   getManageApi,
   loadTestContext,
   resetTestContext,
-} from '../../api/_shared';
+} from '../_shared';
 
 const logger = createTestLogger('Filters:99-Cleanup');
 

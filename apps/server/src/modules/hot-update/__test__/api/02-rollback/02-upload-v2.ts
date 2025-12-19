@@ -16,7 +16,7 @@ import {
   getProtocolApi,
   loadTestContext,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Rollback:02-UploadV2');
 

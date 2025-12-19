@@ -14,7 +14,7 @@ import {
   createClient,
   createTestLogger,
   loadTestContext,
-} from '../../api/_shared';
+} from '../_shared';
 
 const logger = createTestLogger('Filters:03-Check');
 

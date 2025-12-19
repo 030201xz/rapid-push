@@ -114,10 +114,15 @@ export interface TestContext {
   /** Manifest Filters 场景使用 */
   filterKeys: string[];
   testMetadata: Record<string, string>;
+  /** 回滚测试场景使用 */
+  rollbackDirectiveId: string;
 }
 
 /** 测试上下文文件路径 */
 const CONTEXT_FILE = '/tmp/rapid-s-test-context.json';
+
+/** 导出测试上下文文件路径供测试清理使用 */
+export const TEST_CONTEXT_FILE = CONTEXT_FILE;
 
 /** 保存测试上下文 */
 export async function saveTestContext(ctx: Partial<TestContext>) {

@@ -15,7 +15,7 @@ import {
   getManageApi,
   loginAsAdmin,
   saveTestContext,
-} from '../../api/_shared';
+} from '../_shared';
 
 const logger = createTestLogger('Filters:00-Setup');
 

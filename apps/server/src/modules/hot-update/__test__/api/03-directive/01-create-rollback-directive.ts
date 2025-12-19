@@ -18,7 +18,7 @@ import {
   getProtocolApi,
   loadTestContext,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Directive:01-RollbackToEmbedded');
 

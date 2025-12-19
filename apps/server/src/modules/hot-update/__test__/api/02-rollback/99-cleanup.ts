@@ -12,7 +12,7 @@ import {
   createTestLogger,
   getManageApi,
   loadTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Rollback:99-Cleanup');
 

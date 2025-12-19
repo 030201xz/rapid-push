@@ -17,7 +17,7 @@ import {
   createTestLogger,
   loadTestContext,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Basic:01-Upload');
 

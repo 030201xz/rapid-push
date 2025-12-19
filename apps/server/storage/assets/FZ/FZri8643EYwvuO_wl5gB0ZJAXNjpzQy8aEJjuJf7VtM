@@ -1,0 +1,3 @@
+// Gray Release Test Bundle
+console.log('Gray release test bundle loaded');
+export default { version: '1.0.0', grayRelease: true };

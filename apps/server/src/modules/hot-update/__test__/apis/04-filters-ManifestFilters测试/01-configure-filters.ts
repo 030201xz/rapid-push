@@ -15,7 +15,7 @@ import {
   getManageApi,
   loadTestContext,
   saveTestContext,
-} from '../../api/_shared';
+} from '../_shared';
 
 const logger = createTestLogger('Filters:01-Configure');
 

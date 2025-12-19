@@ -22,7 +22,7 @@ import {
   getProtocolApi,
   loadTestContext,
   saveTestContext,
-} from './_shared';
+} from '../apis/_shared';
 
 const logger = createTestLogger('04-Rollback');
 

@@ -15,7 +15,7 @@ import {
   createTestLogger,
   getMetricsApi,
   loadTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Statistics:01-QueryStats');
 

@@ -1,0 +1,205 @@
+/**
+ * Compression Test Bundle
+ * 
+ * This is a test bundle for validating gzip compression support
+ * in the Rapid-S hot update server.
+ */
+
+// 重复内容以增加文件大小，便于观察压缩效果
+const REPEATED_DATA = [
+    "compression_test_data_item_0": "value_for_item_0",
+  item_1": "value_for_item_1",
+  item_2": "value_for_item_2",
+  item_3": "value_for_item_3",
+  item_4": "value_for_item_4",
+  item_5": "value_for_item_5",
+  item_6": "value_for_item_6",
+  item_7": "value_for_item_7",
+  item_8": "value_for_item_8",
+  item_9": "value_for_item_9",
+  item_10": "value_for_item_10",
+  item_11": "value_for_item_11",
+  item_12": "value_for_item_12",
+  item_13": "value_for_item_13",
+  item_14": "value_for_item_14",
+  item_15": "value_for_item_15",
+  item_16": "value_for_item_16",
+  item_17": "value_for_item_17",
+  item_18": "value_for_item_18",
+  item_19": "value_for_item_19",
+  item_20": "value_for_item_20",
+  item_21": "value_for_item_21",
+  item_22": "value_for_item_22",
+  item_23": "value_for_item_23",
+  item_24": "value_for_item_24",
+  item_25": "value_for_item_25",
+  item_26": "value_for_item_26",
+  item_27": "value_for_item_27",
+  item_28": "value_for_item_28",
+  item_29": "value_for_item_29",
+  item_30": "value_for_item_30",
+  item_31": "value_for_item_31",
+  item_32": "value_for_item_32",
+  item_33": "value_for_item_33",
+  item_34": "value_for_item_34",
+  item_35": "value_for_item_35",
+  item_36": "value_for_item_36",
+  item_37": "value_for_item_37",
+  item_38": "value_for_item_38",
+  item_39": "value_for_item_39",
+  item_40": "value_for_item_40",
+  item_41": "value_for_item_41",
+  item_42": "value_for_item_42",
+  item_43": "value_for_item_43",
+  item_44": "value_for_item_44",
+  item_45": "value_for_item_45",
+  item_46": "value_for_item_46",
+  item_47": "value_for_item_47",
+  item_48": "value_for_item_48",
+  item_49": "value_for_item_49"
+];
+
+const CONFIG = {
+  version: "1.0.0",
+  buildNumber: 1,
+  environment: "test",
+  features: {
+    compression: true,
+    gzip: true,
+    brotli: false
+  }
+};
+
+function initializeApp() {
+  console.log("Initializing compression test app...");
+  console.log("Config:", JSON.stringify(CONFIG, null, 2));
+  return true;
+}
+
+function processData(data) {
+  return data.map(item => ({
+    ...item,
+    processed: true,
+    timestamp: Date.now()
+  }));
+}
+
+function calculateMetrics(items) {
+  const total = items.length;
+  const processed = items.filter(i => i.processed).length;
+  return {
+    total,
+    processed,
+    ratio: processed / total
+  };
+}
+
+// 模拟更多代码以增加压缩效果差异
+
+function helperFunction0(input) {
+  return input * 1 + Math.random();
+}
+
+
+function helperFunction1(input) {
+  return input * 2 + Math.random();
+}
+
+
+function helperFunction2(input) {
+  return input * 3 + Math.random();
+}
+
+
+function helperFunction3(input) {
+  return input * 4 + Math.random();
+}
+
+
+function helperFunction4(input) {
+  return input * 5 + Math.random();
+}
+
+
+function helperFunction5(input) {
+  return input * 6 + Math.random();
+}
+
+
+function helperFunction6(input) {
+  return input * 7 + Math.random();
+}
+
+
+function helperFunction7(input) {
+  return input * 8 + Math.random();
+}
+
+
+function helperFunction8(input) {
+  return input * 9 + Math.random();
+}
+
+
+function helperFunction9(input) {
+  return input * 10 + Math.random();
+}
+
+
+function helperFunction10(input) {
+  return input * 11 + Math.random();
+}
+
+
+function helperFunction11(input) {
+  return input * 12 + Math.random();
+}
+
+
+function helperFunction12(input) {
+  return input * 13 + Math.random();
+}
+
+
+function helperFunction13(input) {
+  return input * 14 + Math.random();
+}
+
+
+function helperFunction14(input) {
+  return input * 15 + Math.random();
+}
+
+
+function helperFunction15(input) {
+  return input * 16 + Math.random();
+}
+
+
+function helperFunction16(input) {
+  return input * 17 + Math.random();
+}
+
+
+function helperFunction17(input) {
+  return input * 18 + Math.random();
+}
+
+
+function helperFunction18(input) {
+  return input * 19 + Math.random();
+}
+
+
+function helperFunction19(input) {
+  return input * 20 + Math.random();
+}
+
+
+export default {
+  initializeApp,
+  processData,
+  calculateMetrics,
+  CONFIG,
+  REPEATED_DATA
+};

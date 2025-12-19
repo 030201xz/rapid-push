@@ -18,7 +18,7 @@ import {
   getManageApi,
   loginAsAdmin,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Statistics:00-Setup');
 

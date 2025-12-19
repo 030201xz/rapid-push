@@ -16,7 +16,7 @@ import {
   getManageApi,
   loadTestContext,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Gray:02-CreateRules');
 

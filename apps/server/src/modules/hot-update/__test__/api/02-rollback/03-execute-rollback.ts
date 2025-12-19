@@ -15,7 +15,7 @@ import {
   getProtocolApi,
   loadTestContext,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Rollback:03-Execute');
 

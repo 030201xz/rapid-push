@@ -1,0 +1,3 @@
+// Rollback Test v2 (BUGGY)
+console.log('Version 2.0 loaded - Has Critical Bug!');
+export default { version: '2.0', buggy: true, crash: () => { throw new Error('Critical Bug!'); } };

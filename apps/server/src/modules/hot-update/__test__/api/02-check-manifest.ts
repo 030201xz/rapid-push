@@ -15,7 +15,7 @@ import {
   createTestLogger,
   getProtocolApi,
   loadTestContext,
-} from './_shared';
+} from '../apis/_shared';
 
 const logger = createTestLogger('02-CheckManifest');
 

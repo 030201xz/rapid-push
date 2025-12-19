@@ -5,7 +5,7 @@
  * 运行: bun run src/modules/hot-update/__test__/apis/04-filters/run-all.ts
  */
 
-import { createTestLogger } from '../../api/_shared';
+import { createTestLogger } from '../_shared';
 
 const logger = createTestLogger('Filters:RunAll');
 

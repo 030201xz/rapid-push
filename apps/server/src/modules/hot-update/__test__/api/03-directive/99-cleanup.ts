@@ -11,7 +11,7 @@ import {
   createTestLogger,
   getManageApi,
   loadTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Directive:99-Cleanup');
 

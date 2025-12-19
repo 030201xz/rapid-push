@@ -14,7 +14,7 @@ import {
   createTestLogger,
   getProtocolApi,
   loadTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Gray:03-Verify');
 

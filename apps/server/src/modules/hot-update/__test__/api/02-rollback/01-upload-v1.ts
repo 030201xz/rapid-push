@@ -12,7 +12,7 @@ import {
   createTestLogger,
   loadTestContext,
   saveTestContext,
-} from '../_shared';
+} from '../../apis/_shared';
 
 const logger = createTestLogger('Rollback:01-UploadV1');
 
