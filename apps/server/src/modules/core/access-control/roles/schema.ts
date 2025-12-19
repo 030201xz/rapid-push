@@ -6,13 +6,9 @@
  * - 使用 code 作为唯一标识
  * - 支持角色层级和优先级
  * - 软删除设计
- *
- * 约束 (应用层保证):
- * - code 必须全局唯一
- * - name 不能为空
- * - level 用于角色层级控制 (数值越大权限越高)
  */
 
+import { relations } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -86,3 +82,14 @@ export type NewRole = typeof roles.$inferInsert;
 export type UpdateRole = Partial<
   Pick<NewRole, 'name' | 'description' | 'level' | 'isActive'>
 >;
+
+// ========== Relations 定义（延迟导入避免循环依赖） ==========
+import { rolePermissionMappings } from '../role-permission-mappings/schema';
+import { userRoleMappings } from '../user-role-mappings/schema';
+
+export const rolesRelations = relations(roles, ({ many }) => ({
+  /** 角色拥有的权限映射 */
+  permissions: many(rolePermissionMappings),
+  /** 角色分配给的用户映射 */
+  users: many(userRoleMappings),
+}));

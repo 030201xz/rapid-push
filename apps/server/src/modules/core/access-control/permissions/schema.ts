@@ -4,19 +4,19 @@
  * 核心设计:
  * - 定义系统中的权限项 (如：用户管理、内容发布等)
  * - 使用 code 作为唯一标识
- * - 支持权限分组和层级结构
+ * - 支持权限分组和层级结构 (parentId 真外键约束)
  * - 软删除设计
  *
- * 约束 (应用层保证):
- * - code 必须全局唯一
- * - name 不能为空
- * - parentId 用于构建权限树形结构
+ * 外键约束:
+ * - parentId -> permissions.id (自引用, CASCADE DELETE)
  *
  * Permission 后续不止可以赋予角色，也可以直接赋予用户、API、页面、按钮等实体
  */
 
+import { relations } from 'drizzle-orm';
 import {
   boolean,
+  foreignKey,
   index,
   integer,
   text,
@@ -51,7 +51,7 @@ export const permissions = appSchema.table(
     name: varchar('name', { length: 100 }).notNull(),
     /** 权限描述 */
     description: text('description'),
-    /** 父权限 ID (用于构建权限树，应用层保证存在性) */
+    /** 父权限 ID (外键约束, CASCADE DELETE) */
     parentId: uuid('parent_id'),
     /** 权限类型 (menu=菜单, button=按钮, api=接口) */
     type: varchar('type', { length: 20 }).notNull(),
@@ -67,6 +67,12 @@ export const permissions = appSchema.table(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   t => [
+    // 自引用外键: 父权限删除时级联删除子权限
+    foreignKey({
+      columns: [t.parentId],
+      foreignColumns: [t.id],
+      name: 'fk_permissions_parent',
+    }).onDelete('cascade'),
     // 为 code 建立唯一索引
     index('idx_permissions_code').on(t.code),
     // 为 parentId 建立索引，优化树形结构查询
@@ -77,6 +83,20 @@ export const permissions = appSchema.table(
     index('idx_permissions_active_deleted').on(t.isActive, t.isDeleted),
   ],
 );
+
+// ========== Relations 定义 ==========
+export const permissionsRelations = relations(permissions, ({ one, many }) => ({
+  /** 父权限 */
+  parent: one(permissions, {
+    fields: [permissions.parentId],
+    references: [permissions.id],
+    relationName: 'permission_parent',
+  }),
+  /** 子权限列表 */
+  children: many(permissions, {
+    relationName: 'permission_parent',
+  }),
+}));
 
 // ========== Zod Schema（自动派生） ==========
 

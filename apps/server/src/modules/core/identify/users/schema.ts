@@ -7,13 +7,9 @@
  * - 支持邮箱和手机号验证
  * - 支持账号启用/禁用、锁定、删除状态控制
  * - 软删除设计
- *
- * 约束 (应用层保证):
- * - username 必须全局唯一
- * - email 和 phone 可选但唯一
- * - password 存储加密后的哈希值
  */
 
+import { relations } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -157,3 +153,11 @@ export type UpdateUser = Partial<
     'nickname' | 'email' | 'phone' | 'avatarUrl' | 'bio' | 'gender' | 'birthDate'
   >
 >;
+
+// ========== Relations 定义（延迟导入避免循环依赖） ==========
+import { userRoleMappings } from '../../access-control/user-role-mappings/schema';
+
+export const usersRelations = relations(users, ({ many }) => ({
+  /** 用户拥有的角色映射 */
+  roles: many(userRoleMappings),
+}));

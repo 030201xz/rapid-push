@@ -6,14 +6,12 @@
 
 import { router } from '../common/trpc';
 import { coreRouter } from './core';
-// import { businessRouter } from './business';
-// import { systemRouter } from './system';
+import { hotUpdateRouter } from './hot-update';
 
 // ========== 根路由聚合 ==========
 export const appRouter = router({
   core: coreRouter,
-  // business: businessRouter,
-  // system: systemRouter,
+  hotUpdate: hotUpdateRouter,
 });
 
 // ========== 类型导出 ==========
@@ -23,9 +21,21 @@ export type AppRouter = typeof appRouter;
 
 // ========== 重导出各域类型命名空间 ==========
 export {
-  UsersTypes,
-  RolesTypes,
   PermissionsTypes,
-  UserRoleMappingsTypes,
   RolePermissionMappingsTypes,
+  RolesTypes,
+  UserRoleMappingsTypes,
+  UsersTypes,
 } from './core';
+
+export {
+  AssetsTypes,
+  ChannelsTypes,
+  DirectivesTypes,
+  OrganizationMembersTypes,
+  OrganizationsTypes,
+  ProjectsTypes,
+  RolloutRulesTypes,
+  UpdateAssetsTypes,
+  UpdatesTypes,
+} from './hot-update';

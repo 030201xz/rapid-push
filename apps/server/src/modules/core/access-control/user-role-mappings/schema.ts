@@ -7,37 +7,47 @@
  * - 支持角色撤销（软删除）
  * - 记录角色分配人和分配原因
  *
- * 约束 (应用层保证):
- * - userId 必须存在于 users 表
- * - roleId 必须存在于 roles 表
- * - (userId, roleId) 组合唯一（未撤销的记录）
+ * 外键约束:
+ * - userId -> users.id (CASCADE DELETE)
+ * - roleId -> roles.id (CASCADE DELETE)
+ * - assignedBy -> users.id (SET NULL, 可选)
  */
 
+import { relations } from 'drizzle-orm';
 import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
 import {
   boolean,
   index,
   text,
   timestamp,
+  unique,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
+import { users } from '../../identify/users/schema';
+import { roles } from '../roles/schema';
 
 // ========== 表定义 ==========
 export const userRoleMappings = appSchema.table(
   'user_role_mappings',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    /** 用户 ID（应用层保证存在） */
-    userId: uuid('user_id').notNull(),
-    /** 角色 ID（应用层保证存在） */
-    roleId: uuid('role_id').notNull(),
+    /** 用户 ID (外键约束) */
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    /** 角色 ID (外键约束) */
+    roleId: uuid('role_id')
+      .notNull()
+      .references(() => roles.id, { onDelete: 'cascade' }),
     /** 角色生效时间 */
     effectiveFrom: timestamp('effective_from').notNull().defaultNow(),
     /** 角色失效时间 (null 表示永久有效) */
     effectiveTo: timestamp('effective_to'),
-    /** 分配人 ID（应用层保证存在） */
-    assignedBy: uuid('assigned_by'),
+    /** 分配人 ID (外键约束, 可选) */
+    assignedBy: uuid('assigned_by').references(() => users.id, {
+      onDelete: 'set null',
+    }),
     /** 分配原因 */
     assignReason: text('assign_reason'),
     /** 是否已撤销 */
@@ -46,20 +56,39 @@ export const userRoleMappings = appSchema.table(
     updatedAt: timestamp('updated_at').notNull().defaultNow(),
   },
   t => [
+    // (userId, roleId) 联合唯一约束 (同一用户同一角色只能有一条有效记录)
+    unique('uq_user_role_active').on(t.userId, t.roleId),
     // 为 userId 建立索引，优化用户角色查询
     index('idx_user_role_mappings_user_id').on(t.userId),
     // 为 roleId 建立索引，优化角色用户查询
     index('idx_user_role_mappings_role_id').on(t.roleId),
-    // 为 (userId, roleId) 建立索引，防止重复分配
-    index('idx_user_role_mappings_user_role').on(t.userId, t.roleId),
     // 为有效期建立索引，优化过期角色查询
-    index('idx_user_role_mappings_effective').on(
-      t.effectiveFrom,
-      t.effectiveTo
-    ),
+    index('idx_user_role_mappings_effective').on(t.effectiveFrom, t.effectiveTo),
     // 为撤销状态建立索引，优化有效角色查询
     index('idx_user_role_mappings_is_revoked').on(t.isRevoked),
-  ]
+  ],
+);
+
+// ========== Relations 定义 ==========
+export const userRoleMappingsRelations = relations(
+  userRoleMappings,
+  ({ one }) => ({
+    /** 关联的用户 */
+    user: one(users, {
+      fields: [userRoleMappings.userId],
+      references: [users.id],
+    }),
+    /** 关联的角色 */
+    role: one(roles, {
+      fields: [userRoleMappings.roleId],
+      references: [roles.id],
+    }),
+    /** 分配者 */
+    assigner: one(users, {
+      fields: [userRoleMappings.assignedBy],
+      references: [users.id],
+    }),
+  }),
 );
 
 // ========== Zod Schema（自动派生） ==========
