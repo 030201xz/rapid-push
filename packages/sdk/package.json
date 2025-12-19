@@ -1,0 +1,62 @@
+{
+  "name": "@rapid-s/sdk",
+  "version": "0.1.0",
+  "description": "React Native SDK for Rapid-S hot update server - thin wrapper around expo-updates",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react/index.mjs",
+      "require": "./dist/react/index.js",
+      "types": "./dist/react/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "expo-updates": ">=0.26.0",
+    "react": ">=18.0.0",
+    "react-native": ">=0.74.0"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@trpc/client": "^11.0.0"
+  },
+  "devDependencies": {
+    "@rapid-s/server": "^0.1.0",
+    "@types/react": "^19.2.7",
+    "expo-updates": "^29.0.15",
+    "react": "^19.2.3",
+    "react-native": "^0.83.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "react-native",
+    "hot-update",
+    "code-push",
+    "expo-updates",
+    "rapid-s"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/rapid-s.git",
+    "directory": "packages/sdk"
+  },
+  "license": "MIT"
+}
