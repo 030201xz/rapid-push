@@ -39,10 +39,10 @@
   },
   "devDependencies": {
     "@rapid-s/server": "^0.1.0",
-    "@types/react": "^19.2.7",
+    "@types/react": "~19.1.0",
     "expo-updates": "^29.0.15",
-    "react": "^19.2.3",
-    "react-native": "^0.83.1",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
@@ -57,6 +57,5 @@
     "type": "git",
     "url": "https://github.com/your-org/rapid-s.git",
     "directory": "packages/sdk"
-  },
-  "license": "MIT"
+  }
 }

@@ -8,13 +8,15 @@
     "scheme": "app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": "1.0.0",
     "updates": {
       "enabled": true,
-      "url": "http://192.168.8.114:6688/manifests/ch_i2h8yaNCz8kNRxKTLRzfPK5RvJ2NCjJh",
+      "url": "http://192.168.8.114:6688/manifests/prod_demo_app_channel_key_12345678",
       "fallbackToCacheTimeout": 0
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.app"
     },
     "android": {
       "adaptiveIcon": {
