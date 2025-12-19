@@ -2,19 +2,19 @@
   "folders": [
     {
       "name": "🔥 Server",
-      "path": "apps/server",
+      "path": "apps/server"
     },
-        {
+    {
       "name": "🤖️ MCP",
-      "path": "packages/@rapid-s/mcp/src/tools",
+      "path": "packages/@rapid-s/mcp/src/tools"
     },
     {
       "name": "ROOT",
-      "path": ".",
-    },
+      "path": "."
+    }
   ],
   "extensions": {
-    "recommendations": ["ms-ossdata.vscode-pgsql"],
+    "recommendations": ["ms-ossdata.vscode-pgsql"]
   },
   // 工作区设置
   "settings": {
@@ -42,9 +42,7 @@
       "presentation": "moon",
       "application": "home",
       "domain": "context",
-      "infrastructure": "database",
-
-      
+      "infrastructure": "database"
     },
     "material-icon-theme.files.associations": {
       "index.ts": "bitbucket",
@@ -94,8 +92,7 @@
       "*.service.ts": "nest-service",
       "*.pipe.ts": "nest-pipe",
       "*.gateway.ts": "nest-gateway",
-      "*.resolver.ts": "nest-resolver",
-    },
-
-  },
+      "*.resolver.ts": "nest-resolver"
+    }
+  }
 }

@@ -24,7 +24,8 @@
 
     // 路径解析
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@client/*": ["./client/*"]
     },
 
     // 其他
@@ -35,6 +36,11 @@
     "noEmit": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*.ts", "*.config.ts"],
+  "include": [
+    "src/**/*.ts",
+    "client/**/*.ts",
+    "*.config.ts",
+    "scripts/**/*.ts"
+  ],
   "exclude": ["node_modules", "dist", "other/**/*"]
 }

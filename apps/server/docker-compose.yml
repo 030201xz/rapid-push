@@ -13,10 +13,13 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: rapid_s
+
     ports:
       - "5435:5432"
     volumes:
       - rapid_s_pg_data:/var/lib/postgresql/data
+      # 初始化脚本：自动创建 rapid_s schema
+      - ./initdb:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d rapid_s"]
       interval: 10s

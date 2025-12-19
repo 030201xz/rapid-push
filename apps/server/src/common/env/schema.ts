@@ -6,17 +6,18 @@
 
 import {
   createEnv,
-  portSchema,
-  hostSchema,
-  nodeEnvSchema,
-  logLevelSchema,
   databaseUrlSchema,
+  hostSchema,
+  logLevelSchema,
+  nodeEnvSchema,
+  portSchema,
 } from '@rapid-s/config';
 import { z } from 'zod';
 
 export const env = createEnv({
   schema: {
     // ========== 服务配置 ==========
+    host: hostSchema.default('localhost'),
     /** 服务端口 -> PORT */
     port: portSchema.default(3000),
     /** 运行环境 -> NODE_ENV */

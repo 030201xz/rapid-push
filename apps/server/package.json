@@ -20,11 +20,13 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:reset": "docker compose down -v --remove-orphans && rm -rf drizzle && docker compose up postgres -d && sleep 2 && bun run db:generate && bun run db:migrate"
   },
   "dependencies": {
     "@rapid-s/config": "^0.1.0",
     "@rapid-s/logger": "^0.1.0",
+    "@trpc/client": "^11.8.0",
     "@trpc/server": "^11.8.0",
     "drizzle-orm": "^0.45.1",
     "drizzle-zod": "^0.8.3",

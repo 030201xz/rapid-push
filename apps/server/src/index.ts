@@ -5,10 +5,10 @@ import { logger } from './common/logger';
 // ========== Bun 原生服务 ==========
 
 Bun.serve({
-  hostname: '0.0.0.0',
+  hostname: env.host,
   port: env.port,
   fetch: app.fetch,
   reusePort: true,
 });
 
-logger.info(`🚀 Server running on http://0.0.0.0:${env.port}`);
+logger.info(`🚀 Server running on http://${env.host}:${env.port}`);
