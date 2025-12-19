@@ -4,6 +4,7 @@
  * 所有请求共享的上下文
  */
 
+import type { Context as HonoContext } from 'hono';
 import type { RapidSDatabase } from '../../common/database/postgresql/rapid-s';
 
 /** 认证信息（用户 + JWT 元数据） */
@@ -22,6 +23,8 @@ export interface BaseContext {
   db: RapidSDatabase;
   /** 请求追踪 ID */
   requestId?: string;
+  /** Hono Context（用于访问原始请求/响应对象） */
+  honoContext: HonoContext;
   /** 获取当前认证信息（包含用户、jti、sessionId，可能为 null） */
   getAuth: () => Promise<AuthInfo | null>;
 }

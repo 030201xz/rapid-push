@@ -13,6 +13,7 @@ export function createContext(c: HonoContext): BaseContext {
   return {
     db: getDb(),
     requestId: c.get('requestId') as string | undefined,
+    honoContext: c, // 保存 Hono Context 引用
     // 从 Authorization header 解析 JWT，返回完整认证信息（包含黑名单检查）
     getAuth: async (): Promise<AuthInfo | null> => {
       const authHeader = c.req.header('Authorization');

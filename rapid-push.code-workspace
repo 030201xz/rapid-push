@@ -5,6 +5,14 @@
       "path": "apps/server"
     },
     {
+      "name": "🏠️ App",
+      "path": "apps/app"
+    },
+    {
+      "name": "🔥️ SDK",
+      "path": "packages/sdk"
+    },
+    {
       "name": "🤖️ MCP",
       "path": "packages/@rapid-s/mcp/src/tools"
     },

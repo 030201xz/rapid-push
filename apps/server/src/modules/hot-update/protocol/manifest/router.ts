@@ -2,9 +2,11 @@
  * Manifest 路由
  *
  * 提供客户端检查更新的 tRPC 接口
+ * 符合 Expo Updates v1 协议规范
  */
 
-import { publicProcedure, router } from '@/common/trpc';
+import { router } from '@/common/trpc';
+import { expoManifestProcedure } from '@/common/trpc/procedures/expo-updates';
 import { checkUpdateRequestSchema } from './schema';
 import * as manifestService from './service';
 
@@ -15,8 +17,12 @@ export const manifestRouter = router({
    *
    * 客户端调用此接口获取最新更新信息
    * 返回：更新 Manifest / 无更新 / 回滚指令
+   *
+   * 符合 Expo Updates v1 协议：
+   * - 自动处理 expo-protocol-version 等请求头
+   * - 自动设置 expo-protocol-version、expo-sfv-version 等响应头
    */
-  check: publicProcedure
+  check: expoManifestProcedure
     .input(checkUpdateRequestSchema)
     .query(async ({ ctx, input }) => {
       // 构建资源 URL 前缀
@@ -24,10 +30,23 @@ export const manifestRouter = router({
       // 简化为相对路径，客户端拼接
       const assetUrlPrefix = '/assets';
 
-      return manifestService.checkUpdate(
+      const result = await manifestService.checkUpdate(
         ctx.db,
         input,
         assetUrlPrefix
       );
+
+      // 如果有签名，设置到响应头（符合 Expo 规范）
+      if (
+        result.type === 'updateAvailable' &&
+        result.signature
+      ) {
+        ctx.honoContext.header(
+          'expo-signature',
+          `sig=:${result.signature}:`
+        );
+      }
+
+      return result;
     }),
 });

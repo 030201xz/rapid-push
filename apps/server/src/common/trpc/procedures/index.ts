@@ -5,3 +5,7 @@
 export { publicProcedure } from './public';
 export { protectedProcedure } from './protected';
 export { adminProcedure } from './admin';
+export {
+  expoManifestProcedure,
+  expoUpdatesMiddleware,
+} from './expo-updates';

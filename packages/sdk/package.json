@@ -1,0 +1,67 @@
+{
+  "name": "@rapid-push/sdk",
+  "version": "0.1.0",
+  "description": "React Native SDK for Rapid Push hot update server",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "expo-updates": ">=0.26.0",
+    "expo-constants": ">=17.0.0",
+    "react": ">=18.0.0",
+    "react-native": ">=0.76.0"
+  },
+  "peerDependenciesMeta": {
+    "expo-updates": {
+      "optional": false
+    },
+    "expo-constants": {
+      "optional": false
+    }
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@trpc/client": "^11.8.0"
+  },
+  "devDependencies": {
+    "@rapid-s/server": "^0.1.0",
+    "@types/react": "^19.2.7",
+    "expo-constants": "^18.0.12",
+    "expo-updates": "^29.0.15",
+    "react": "^19.2.3",
+    "react-native": "^0.83.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "expo",
+    "react-native",
+    "hot-update",
+    "code-push",
+    "ota",
+    "rapid-push"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rapid-push/sdk"
+  }
+}

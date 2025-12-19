@@ -27,6 +27,15 @@ export type { AppRouter } from './modules';
 // ========== Router Input/Output 推断类型 ==========
 export type { RouterInput, RouterOutput } from './types/router';
 
+// ========== Context 类型（供 tRPC 类型推断使用） ==========
+export type {
+  AdminContext,
+  AuthContext,
+  AuthInfo,
+  AuthUser,
+  BaseContext,
+} from './types/context';
+
 // ========== 模块类型命名空间 ==========
 export { UsersTypes } from './modules';
 // export { PostsTypes } from './modules';
