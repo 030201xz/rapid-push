@@ -8,6 +8,7 @@ import {
 } from './common/middlewares';
 import { createContext } from './common/trpc';
 import { appRouter } from './modules';
+import { registerManifestRoutes } from './modules/hot-update/protocol/manifest/http';
 import { registerAssetRoutes } from './modules/hot-update/storage/assets/http';
 import type { AppEnv } from './types/index';
 
@@ -38,8 +39,9 @@ app.get('/health', c =>
   })
 );
 
-// ========== 资源下载路由（Expo Updates 协议） ==========
-registerAssetRoutes(app);
+// ========== Expo Updates 协议路由 ==========
+registerManifestRoutes(app); // Manifest 检查更新
+registerAssetRoutes(app); // 资源下载
 
 // ========== 根路径 ==========
 app.get('/', c =>

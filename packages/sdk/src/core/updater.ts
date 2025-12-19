@@ -2,12 +2,12 @@
  * 核心 Updater 模块
  *
  * 薄封装 expo-updates API，提供类型安全的更新操作
+ * 不捕获错误，让原始错误直接抛出以便调试
  */
 
 import * as Updates from 'expo-updates';
 
 import type { Manifest, ManifestAsset } from '../types/server';
-import type { UpdaterError, UpdaterErrorCode } from '../types/config';
 
 // ==================== 类型转换工具 ====================
 
@@ -60,17 +60,6 @@ function toManifest(expoManifest: Updates.Manifest): Manifest {
   };
 }
 
-/**
- * 创建标准化的更新错误
- */
-function createError(
-  code: UpdaterErrorCode,
-  message: string,
-  cause?: unknown,
-): UpdaterError {
-  return { code, message, cause };
-}
-
 // ==================== 核心 Updater 类 ====================
 
 /**
@@ -78,6 +67,7 @@ function createError(
  *
  * 提供更新检查、下载、应用的核心功能
  * 作为 expo-updates 的薄封装层
+ * 不捕获错误，让原始错误直接抛出以便调试
  */
 export class Updater {
   // ==================== 更新检查 ====================
@@ -86,24 +76,31 @@ export class Updater {
    * 检查更新
    *
    * @returns 如果有更新可用返回 Manifest，否则返回 null
-   * @throws UpdaterError 检查失败时
+   * @throws 原始 expo-updates 错误
    */
   static async checkForUpdate(): Promise<Manifest | null> {
-    try {
-      const result = await Updates.checkForUpdateAsync();
+    // 调试日志：检查 expo-updates 状态
+    console.log('[Updater] checkForUpdate 开始');
+    console.log('[Updater] Updates.isEnabled:', Updates.isEnabled);
+    console.log('[Updater] Updates.runtimeVersion:', Updates.runtimeVersion);
+    console.log('[Updater] Updates.channel:', Updates.channel);
+    console.log('[Updater] Updates.updateUrl:', (Updates as Record<string, unknown>)['updateUrl']);
+    
+    console.log('[Updater] 调用 Updates.checkForUpdateAsync...');
+    const startTime = Date.now();
+    
+    const result = await Updates.checkForUpdateAsync();
+    
+    const elapsed = Date.now() - startTime;
+    console.log(`[Updater] checkForUpdateAsync 完成，耗时 ${elapsed}ms`);
+    console.log('[Updater] result.isAvailable:', result.isAvailable);
+    console.log('[Updater] result.manifest:', result.manifest);
 
-      if (!result.isAvailable || !result.manifest) {
-        return null;
-      }
-
-      return toManifest(result.manifest);
-    } catch (error) {
-      throw createError(
-        'CHECK_FAILED',
-        '检查更新失败',
-        error,
-      );
+    if (!result.isAvailable || !result.manifest) {
+      return null;
     }
+
+    return toManifest(result.manifest);
   }
 
   // ==================== 下载更新 ====================
@@ -112,26 +109,18 @@ export class Updater {
    * 下载更新
    *
    * @param onProgress 下载进度回调（expo-updates 暂不支持进度）
-   * @throws UpdaterError 下载失败时
+   * @throws 原始 expo-updates 错误
    */
   static async downloadUpdate(
     onProgress?: (progress: number) => void,
   ): Promise<void> {
-    try {
-      // expo-updates 的 fetchUpdateAsync 不支持进度回调
-      // 这里模拟开始和结束
-      onProgress?.(0);
+    // expo-updates 的 fetchUpdateAsync 不支持进度回调
+    // 这里模拟开始和结束
+    onProgress?.(0);
 
-      await Updates.fetchUpdateAsync();
+    await Updates.fetchUpdateAsync();
 
-      onProgress?.(1);
-    } catch (error) {
-      throw createError(
-        'DOWNLOAD_FAILED',
-        '下载更新失败',
-        error,
-      );
-    }
+    onProgress?.(1);
   }
 
   // ==================== 应用更新 ====================
@@ -139,20 +128,10 @@ export class Updater {
   /**
    * 应用更新（重启应用）
    *
-   * @throws UpdaterError 应用失败时
+   * @throws 原始 expo-updates 错误
    */
   static async applyUpdate(): Promise<void> {
-    try {
-      await Updates.reloadAsync();
-      // 如果执行到这里说明重启未成功
-      throw new Error('重启未成功');
-    } catch (error) {
-      throw createError(
-        'APPLY_FAILED',
-        '应用更新失败',
-        error,
-      );
-    }
+    await Updates.reloadAsync();
   }
 
   // ==================== 状态查询 ====================

@@ -2,6 +2,7 @@
  * Manifest 模块入口
  */
 
+export { registerManifestRoutes } from './http';
 export { manifestRouter } from './router';
 export { checkUpdateRequestSchema, platformSchema } from './schema';
 export * as ManifestService from './service';

@@ -109,13 +109,35 @@ function UpdateStatusSection() {
         );
 
       case 'error':
+        const causeMessage = state.error.cause instanceof Error
+          ? state.error.cause.message
+          : state.error.cause != null
+            ? String(state.error.cause)
+            : null;
         return (
           <View>
             <ThemedText style={styles.statusError}>❌ 发生错误</ThemedText>
             <ThemedText style={styles.errorCode}>{state.error.code}</ThemedText>
             <ThemedText style={styles.errorMessage}>{state.error.message}</ThemedText>
+            {causeMessage && (
+              <ThemedText style={styles.errorCause} selectable>
+                原因: {causeMessage}
+              </ThemedText>
+            )}
           </View>
         );
+    }
+  };
+
+  // 检查更新并处理错误
+  const handleCheckForUpdate = async () => {
+    try {
+      await checkForUpdate();
+    } catch (error) {
+      // 错误会直接抛出到 React Error Boundary
+      // 这里只是打印日志方便调试
+      console.error('检查更新失败:', error);
+      throw error;
     }
   };
 
@@ -124,7 +146,7 @@ function UpdateStatusSection() {
     switch (state.status) {
       case 'idle':
         return (
-          <TouchableOpacity style={styles.button} onPress={() => checkForUpdate()}>
+          <TouchableOpacity style={styles.button} onPress={handleCheckForUpdate}>
             <ThemedText style={styles.buttonText}>检查更新</ThemedText>
           </TouchableOpacity>
         );
@@ -186,7 +208,7 @@ export default function UpdatesScreen() {
   return (
     <ScrollView style={styles.container}>
       <ThemedView style={styles.header}>
-        <ThemedText type="title">热更新测试</ThemedText>
+        <ThemedText type="title">热更新测试!!!!</ThemedText>
         <ThemedText style={styles.subtitle}>RapidS SDK Demo</ThemedText>
       </ThemedView>
 
@@ -300,6 +322,16 @@ const styles = StyleSheet.create({
     marginTop: 4,
     opacity: 0.7,
     textAlign: 'center',
+  },
+  errorCause: {
+    marginTop: 8,
+    fontSize: 12,
+    fontFamily: 'monospace',
+    opacity: 0.6,
+    textAlign: 'left',
+    backgroundColor: '#FFF3E0',
+    padding: 8,
+    borderRadius: 4,
   },
   progressBar: {
     width: '100%',

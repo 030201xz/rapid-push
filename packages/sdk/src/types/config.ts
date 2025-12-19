@@ -91,6 +91,7 @@ export interface RapidSProviderProps extends RapidSConfig {
  * SDK 错误类型
  */
 export type UpdaterErrorCode =
+  | 'NOT_AVAILABLE'
   | 'CHECK_FAILED'
   | 'DOWNLOAD_FAILED'
   | 'APPLY_FAILED'

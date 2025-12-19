@@ -25,10 +25,13 @@ export const manifestRouter = router({
   check: expoManifestProcedure
     .input(checkUpdateRequestSchema)
     .query(async ({ ctx, input }) => {
-      // 构建资源 URL 前缀
-      // 格式: http://host:port/trpc/hotUpdate.assets.download?input={"hash":"xxx"}
-      // 简化为相对路径，客户端拼接
-      const assetUrlPrefix = '/assets';
+      // 构建资源 URL 前缀(完整 URL)
+      // expo-updates 需要完整的 URL 来下载资源
+      const protocol =
+        ctx.honoContext.req.header('x-forwarded-proto') || 'http';
+      const host =
+        ctx.honoContext.req.header('host') || 'localhost:6688';
+      const assetUrlPrefix = `${protocol}://${host}/assets`;
 
       const result = await manifestService.checkUpdate(
         ctx.db,

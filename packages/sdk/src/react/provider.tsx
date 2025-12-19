@@ -2,6 +2,7 @@
  * RapidS Provider
  *
  * 提供全局状态管理和配置
+ * 不捕获错误，让原始错误直接抛出以便调试
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
@@ -12,8 +13,6 @@ import {
   trackCheckEvent,
   trackDownloadStart,
   trackDownloadComplete,
-  trackDownloadFailed,
-  trackApplyFailed,
   flushAnalytics,
   DismissedUpdates,
   setLastCheckTime,
@@ -111,7 +110,7 @@ export function RapidSProvider({
   onUpdateAvailable,
   onUpdateDownloaded,
   // onRollback,
-  onError,
+  // onError - 不再使用，错误直接抛出
 }: RapidSProviderProps): React.ReactElement {
   const [state, dispatch] = useReducer(updaterReducer, initialState);
   const checkIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -145,15 +144,29 @@ export function RapidSProvider({
   // ==================== 操作方法 ====================
 
   const checkForUpdate = useCallback(async (): Promise<Manifest | null> => {
+    console.log('[RapidS] checkForUpdate 开始');
+
+    // 开发模式下 expo-updates 不可用，抛出明确错误
     if (!Updater.isAvailable()) {
-      return null;
+      const error: UpdaterError = {
+        code: 'NOT_AVAILABLE',
+        message: 'expo-updates 在开发模式下不可用，请使用发布版本测试热更新功能',
+      };
+      console.error('[RapidS] expo-updates 不可用:', error.message);
+      dispatch({ type: 'CHECK_ERROR', error });
+      throw new Error(error.message);
     }
 
     dispatch({ type: 'CHECK_START' });
+    console.log('[RapidS] 状态已更新为 checking');
 
     try {
-      await trackCheckEvent();
+      // 统计事件不阻塞主流程，异步执行
+      trackCheckEvent().catch((e) => console.warn('[RapidS] trackCheckEvent 失败:', e));
+
+      console.log('[RapidS] 调用 Updater.checkForUpdate...');
       const manifest = await Updater.checkForUpdate();
+      console.log('[RapidS] checkForUpdate 返回:', manifest ? '有更新' : '无更新');
 
       if (!manifest) {
         dispatch({ type: 'CHECK_NO_UPDATE' });
@@ -163,82 +176,99 @@ export function RapidSProvider({
       // 检查是否已忽略
       const isDismissed = await DismissedUpdates.isDismissed(manifest.id);
       if (isDismissed) {
+        console.log('[RapidS] 更新已被忽略:', manifest.id);
         dispatch({ type: 'CHECK_NO_UPDATE' });
         return null;
       }
 
       currentManifestRef.current = manifest;
       dispatch({ type: 'CHECK_SUCCESS', manifest });
-      await setLastCheckTime(new Date());
+      // 异步设置检查时间，不阻塞
+      setLastCheckTime(new Date()).catch((e) =>
+        console.warn('[RapidS] setLastCheckTime 失败:', e),
+      );
       onUpdateAvailable?.(manifest);
 
       return manifest;
     } catch (error) {
+      // 捕获所有错误，更新状态并记录日志
       const updaterError: UpdaterError = {
         code: 'CHECK_FAILED',
-        message: '检查更新失败',
-        cause: error,
+        message: error instanceof Error ? error.message : '检查更新时发生未知错误',
+        cause: error instanceof Error ? error : undefined,
       };
+      console.error('[RapidS] checkForUpdate 错误:', updaterError.message, error);
       dispatch({ type: 'CHECK_ERROR', error: updaterError });
-      onError?.(updaterError);
-      return null;
+      throw error;
     }
-  }, [onUpdateAvailable, onError]);
+  }, [onUpdateAvailable]);
 
   const downloadUpdate = useCallback(async (): Promise<void> => {
     if (state.status !== 'available') {
+      console.warn('[RapidS] downloadUpdate 调用时状态不是 available:', state.status);
       return;
     }
 
     const manifest = state.manifest;
     dispatch({ type: 'DOWNLOAD_START', manifest });
+    console.log('[RapidS] 开始下载更新:', manifest.id);
 
     try {
-      await trackDownloadStart(manifest.id);
+      // 统计事件不阻塞主流程
+      trackDownloadStart(manifest.id).catch((e) =>
+        console.warn('[RapidS] trackDownloadStart 失败:', e),
+      );
 
       await Updater.downloadUpdate((progress) => {
         dispatch({ type: 'DOWNLOAD_PROGRESS', progress, manifest });
       });
 
-      await trackDownloadComplete(manifest.id);
+      // 统计事件不阻塞主流程
+      trackDownloadComplete(manifest.id).catch((e) =>
+        console.warn('[RapidS] trackDownloadComplete 失败:', e),
+      );
+
       dispatch({ type: 'DOWNLOAD_SUCCESS', manifest });
+      console.log('[RapidS] 下载完成:', manifest.id);
       onUpdateDownloaded?.(manifest);
     } catch (error) {
       const updaterError: UpdaterError = {
         code: 'DOWNLOAD_FAILED',
-        message: '下载更新失败',
-        cause: error,
+        message: error instanceof Error ? error.message : '下载更新时发生未知错误',
+        cause: error instanceof Error ? error : undefined,
       };
-      await trackDownloadFailed(manifest.id, String(error));
+      console.error('[RapidS] downloadUpdate 错误:', updaterError.message, error);
       dispatch({ type: 'DOWNLOAD_ERROR', error: updaterError });
-      onError?.(updaterError);
+      throw error;
     }
-  }, [state, onUpdateDownloaded, onError]);
+  }, [state, onUpdateDownloaded]);
 
   const applyUpdate = useCallback(async (): Promise<void> => {
     if (state.status !== 'ready') {
+      console.warn('[RapidS] applyUpdate 调用时状态不是 ready:', state.status);
       return;
     }
 
     const manifest = state.manifest;
     dispatch({ type: 'APPLY_START', manifest });
+    console.log('[RapidS] 开始应用更新:', manifest.id);
 
     try {
-      // 刷新统计队列
-      await flushAnalytics();
+      // 刷新统计队列（不阻塞）
+      flushAnalytics().catch((e) => console.warn('[RapidS] flushAnalytics 失败:', e));
       // 应用更新（会重启应用）
       await Updater.applyUpdate();
     } catch (error) {
       const updaterError: UpdaterError = {
         code: 'APPLY_FAILED',
-        message: '应用更新失败',
-        cause: error,
+        message: error instanceof Error ? error.message : '应用更新时发生未知错误',
+        cause: error instanceof Error ? error : undefined,
       };
-      await trackApplyFailed(manifest.id, String(error));
+      console.error('[RapidS] applyUpdate 错误:', updaterError.message, error);
       dispatch({ type: 'APPLY_ERROR', error: updaterError });
-      onError?.(updaterError);
+      throw error;
     }
-  }, [state, onError]);
+  }, [state]);
 
   const dismissUpdate = useCallback(
     (persistent = false): void => {
@@ -271,17 +301,24 @@ export function RapidSProvider({
   // 启动时检查
   useEffect(() => {
     if (checkOnMount && Updater.isAvailable()) {
-      checkForUpdate();
+      console.log('[RapidS] checkOnMount 触发自动检查更新');
+      // 错误已在 checkForUpdate 内部处理并更新状态，这里只需 catch 防止未处理的 rejection
+      checkForUpdate().catch(() => {
+        // 错误已在 checkForUpdate 中处理，这里静默
+      });
     }
   }, [checkOnMount, checkForUpdate]);
 
   // 定时检查
   useEffect(() => {
     if (checkInterval > 0 && Updater.isAvailable()) {
+      console.log('[RapidS] 启用定时检查，间隔:', checkInterval, 'ms');
       checkIntervalRef.current = setInterval(() => {
         // 只在空闲状态时检查
         if (state.status === 'idle') {
-          checkForUpdate();
+          checkForUpdate().catch(() => {
+            // 错误已在 checkForUpdate 中处理
+          });
         }
       }, checkInterval);
     }
