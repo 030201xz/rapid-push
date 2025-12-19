@@ -50,7 +50,7 @@ export const manifestRouter = router({
         if (result.signature) {
           ctx.honoContext.header(
             'expo-signature',
-            `sig=:${result.signature}:`
+            result.signature // 已经包含 sig=:base64: 格式
           );
         }
       }

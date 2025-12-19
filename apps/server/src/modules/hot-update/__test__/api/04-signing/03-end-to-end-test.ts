@@ -214,7 +214,7 @@ async function main() {
     logger.info('-'.repeat(60));
 
     const checkUrl = new URL(
-      `${API_URL}/trpc/hotUpdate.protocol.manifest.check`
+      `${API_URL}/hotUpdate.protocol.manifest.check`
     );
     checkUrl.searchParams.set(
       'input',
