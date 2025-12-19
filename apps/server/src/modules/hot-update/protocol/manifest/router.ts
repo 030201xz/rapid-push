@@ -37,10 +37,7 @@ export const manifestRouter = router({
       );
 
       // 如果有签名，设置到响应头（符合 Expo 规范）
-      if (
-        result.type === 'updateAvailable' &&
-        result.signature
-      ) {
+      if (result.type === 'updateAvailable' && result.signature) {
         ctx.honoContext.header(
           'expo-signature',
           `sig=:${result.signature}:`

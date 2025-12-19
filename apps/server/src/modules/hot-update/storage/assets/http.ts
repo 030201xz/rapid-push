@@ -4,8 +4,8 @@
  * 符合 Expo Updates v1 协议规范的二进制资源下载
  */
 
-import type { Hono, Env } from 'hono';
 import { getDb } from '@/common/database/postgresql/rapid-s';
+import type { Env, Hono } from 'hono';
 import * as assetService from './service';
 
 /**
