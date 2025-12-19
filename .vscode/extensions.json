@@ -60,7 +60,6 @@
     // Git Tags
     "howardzuo.vscode-git-tags",
 
-
     // JSON Comments
     "wxzhang.json-comments",
 
@@ -75,6 +74,6 @@
     "illixion.vscode-vibrancy-continued",
 
     // tailwindcss
-    "bradlc.vscode-tailwindcss",
+    "bradlc.vscode-tailwindcss"
   ]
 }

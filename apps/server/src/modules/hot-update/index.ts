@@ -1,96 +1,117 @@
 /**
  * Hot Update 域聚合入口
  *
- * 包含热更新服务的所有模块：
- * - organizations: 组织管理
- * - projects: 项目管理
- * - channels: 渠道管理 + 代码签名
- * - assets: 资源文件管理
- * - updates: 更新发布
- * - directives: 指令管理
- * - rolloutRules: 灰度发布规则
- * - manifest: 检查更新（客户端协议）
- * - analytics: 事件上报
- * - statistics: 统计管理
+ * 按使用场景分为四个子域：
+ * - manage: 管理后台域（开发者 CRUD）
+ * - storage: 资源存储域（内容寻址存储）
+ * - protocol: 客户端协议域（App 使用）
+ * - metrics: 统计指标域（运营查询）
+ *
+ * 路由路径（嵌套结构）：
+ * - hotUpdate.manage.organizations / projects / channels / updates / directives / rolloutRules
+ * - hotUpdate.storage.assets
+ * - hotUpdate.protocol.manifest / analytics
+ * - hotUpdate.metrics.statistics
  */
 
 import { router } from '@/common/trpc';
 
-// ========== 导入各模块路由 ==========
-import { analyticsRouter } from './analytics';
-import { assetsRouter } from './assets';
-import { channelsRouter } from './channels';
-import { directivesRouter } from './directives';
-import { manifestRouter } from './manifest';
-import { organizationsRouter } from './organizations';
-import { projectsRouter } from './projects';
-import { rolloutRulesRouter } from './rollout-rules';
-import { statisticsRouter } from './statistics';
-import { updatesRouter } from './updates';
+// ========== 导入各子域路由 ==========
+import { manageRouter } from './manage';
+import { metricsRouter } from './metrics';
+import { protocolRouter } from './protocol';
+import { storageRouter } from './storage';
 
-// ========== Hot Update 域路由聚合 ==========
+// ========== Hot Update 域路由聚合（嵌套结构） ==========
 export const hotUpdateRouter = router({
-  organizations: organizationsRouter,
-  projects: projectsRouter,
-  channels: channelsRouter,
-  assets: assetsRouter,
-  updates: updatesRouter,
-  directives: directivesRouter,
-  rolloutRules: rolloutRulesRouter,
-  manifest: manifestRouter,
-  analytics: analyticsRouter,
-  statistics: statisticsRouter,
+  /** 管理后台域：组织/项目/渠道/更新/指令/灰度规则 */
+  manage: manageRouter,
+  /** 资源存储域：内容寻址存储 */
+  storage: storageRouter,
+  /** 客户端协议域：检查更新/事件上报 */
+  protocol: protocolRouter,
+  /** 统计指标域：统计查询 */
+  metrics: metricsRouter,
 });
 
-// ========== 重导出各模块 ==========
+// ========== 重导出子域路由 ==========
+export { manageRouter } from './manage';
+export { metricsRouter } from './metrics';
+export { protocolRouter } from './protocol';
+export { storageRouter } from './storage';
+
+// ========== 重导出管理域（类型命名空间 + Schema） ==========
 export {
+  // Schema
+  channels,
+  // 路由
+  channelsRouter,
+  // 类型命名空间
+  ChannelsTypes,
+  // 常量
+  DIRECTIVE_TYPE,
+  directives,
+  directivesRouter,
+  DirectivesTypes,
+  organizations,
+  organizationsRouter,
+  OrganizationsTypes,
+  projects,
+  projectsRouter,
+  ProjectsTypes,
+  ROLLOUT_RULE_TYPE,
+  rolloutRules,
+  rolloutRulesRouter,
+  RolloutRulesTypes,
+  updates,
+  updatesRouter,
+  UpdatesTypes,
+} from './manage';
+
+// ========== 重导出存储域 ==========
+export {
+  // Schema
+  assets,
+  // 路由
+  assetsRouter,
+  // 类型命名空间
+  AssetsTypes,
+  // 常量
+  PLATFORM,
+  updateAssets,
+  // 服务
+  UpdateAssetsService,
+  UpdateAssetsTypes,
+} from './storage';
+
+// ========== 重导出协议域 ==========
+export {
+  // 常量
   ANALYTICS_EVENT_TYPE,
+  // 路由
   analyticsRouter,
+  // 服务
   AnalyticsService,
-  type AnalyticsEvent,
-  type AnalyticsEventType,
-} from './analytics';
-export { assetsRouter, AssetsTypes } from './assets';
-export { channelsRouter, ChannelsTypes } from './channels';
-export { directivesRouter, DirectivesTypes } from './directives';
-export {
   manifestRouter,
   ManifestService,
   RESPONSE_TYPE,
+  // 类型
+  type AnalyticsEvent,
+  type AnalyticsEventType,
   type CheckUpdateRequest,
   type CheckUpdateResponse,
   type Manifest,
   type ManifestAsset,
   type Platform,
-} from './manifest';
+} from './protocol';
+
+// ========== 重导出指标域 ==========
 export {
-  organizationsRouter,
-  OrganizationsTypes,
-} from './organizations';
-export { projectsRouter, ProjectsTypes } from './projects';
-export {
-  rolloutRulesRouter,
-  RolloutRulesTypes,
-} from './rollout-rules';
-export {
+  // 路由
   statisticsRouter,
+  // 服务
   StatisticsService,
+  // 类型
   type ChannelStats,
   type UpdateStats,
-} from './statistics';
-export { updatesRouter, UpdatesTypes } from './updates';
-
-// ========== 重导出 Schema（用于数据库迁移） ==========
-export { assets } from './assets';
-export { channels } from './channels';
-export { DIRECTIVE_TYPE, directives } from './directives';
-export { organizations } from './organizations';
-export { projects } from './projects';
-export { ROLLOUT_RULE_TYPE, rolloutRules } from './rollout-rules';
-export {
-  PLATFORM,
-  updateAssets,
-  UpdateAssetsService,
-  UpdateAssetsTypes,
-} from './update-assets';
-export { updates } from './updates';
+} from './metrics';

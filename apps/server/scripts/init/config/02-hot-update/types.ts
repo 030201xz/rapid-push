@@ -4,9 +4,9 @@
  * 复用 Drizzle Schema 导出的插入类型，确保类型安全
  */
 
-import type { NewChannel } from '@/modules/hot-update/channels/schema';
-import type { NewOrganization } from '@/modules/hot-update/organizations/schema';
-import type { NewProject } from '@/modules/hot-update/projects/schema';
+import type { NewChannel } from '@/modules/hot-update/manage/channels/schema';
+import type { NewOrganization } from '@/modules/hot-update/manage/organizations/schema';
+import type { NewProject } from '@/modules/hot-update/manage/projects/schema';
 import type {
   ChannelKey,
   OrganizationKey,

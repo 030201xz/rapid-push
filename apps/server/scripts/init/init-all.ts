@@ -22,9 +22,9 @@ import { rolePermissionMappings } from '@/modules/core/access-control/role-permi
 import { roles as rolesTable } from '@/modules/core/access-control/roles/schema';
 import { userRoleMappings } from '@/modules/core/access-control/user-role-mappings/schema';
 import { users as usersTable } from '@/modules/core/identify/users/schema';
-import { channels as channelsTable } from '@/modules/hot-update/channels/schema';
-import { organizations as organizationsTable } from '@/modules/hot-update/organizations/schema';
-import { projects as projectsTable } from '@/modules/hot-update/projects/schema';
+import { channels as channelsTable } from '@/modules/hot-update/manage/channels/schema';
+import { organizations as organizationsTable } from '@/modules/hot-update/manage/organizations/schema';
+import { projects as projectsTable } from '@/modules/hot-update/manage/projects/schema';
 import { sql } from 'drizzle-orm';
 import {
   ChannelIds,
