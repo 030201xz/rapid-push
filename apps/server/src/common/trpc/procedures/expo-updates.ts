@@ -75,7 +75,19 @@ export const expoUpdatesMiddleware = t.middleware(async opts => {
   // 4. 设置 Cache-Control（Manifest 不应缓存）
   honoContext.header('cache-control', 'private, max-age=0');
 
-  // 5. 注入 Expo 上下文
+  // 5. 设置 expo-manifest-filters（用于客户端过滤更新）
+  // SFV 字典格式，用于按元数据字段过滤更新
+  // 示例：expo-manifest-filters: branchName="main", releaseChannel="production"
+  // 当前暂时为空，后续可根据业务需求扩展
+  honoContext.header('expo-manifest-filters', '');
+
+  // 6. 设置 expo-server-defined-headers（用于持久化客户端请求头）
+  // Expo SFV 是 RFC 8941 的子集，支持字典格式【https://docs.expo.dev/technical-specs/expo-sfv-0/】
+  // SFV 字典格式，定义客户端必须在后续请求中包含的头
+  // 当前暂时为空，后续可根据业务需求扩展
+  honoContext.header('expo-server-defined-headers', '');
+
+  // 7. 注入 Expo 上下文
   const expoContext: ExpoUpdatesContext = {
     expoProtocolVersion: protocolVersion ?? '1',
     expoPlatform: platform ?? '',
@@ -98,5 +110,6 @@ export const expoUpdatesMiddleware = t.middleware(async opts => {
  *
  * 已应用 Expo Updates 中间件，自动处理协议头
  */
-export const expoManifestProcedure =
-  publicProcedure.use(expoUpdatesMiddleware);
+export const expoManifestProcedure = publicProcedure.use(
+  expoUpdatesMiddleware
+);
