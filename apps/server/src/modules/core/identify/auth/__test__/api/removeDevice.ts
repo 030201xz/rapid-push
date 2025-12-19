@@ -150,12 +150,13 @@ async function testRemoveNonExistentDevice(accessToken: string) {
 async function testRemoveOtherUserDevice(accessToken: string) {
   logger.info('测试删除其他用户的设备（应被拒绝）...');
 
-  // 使用一个伪造的设备 ID 来模拟
+  // 使用一个不属于当前用户的有效 UUID 格式
   // 实际测试中，可能需要创建另一个用户的设备
   const authedClient = createClient(API_URL, { token: accessToken });
   const auth = getAuthApi(authedClient);
 
-  const otherUserDeviceId = '11111111-1111-1111-1111-111111111111';
+  // 使用符合 UUID v4 格式的伪造 ID
+  const otherUserDeviceId = '11111111-1111-4111-a111-111111111111';
   const result = await auth.removeDevice.mutate({
     deviceId: otherUserDeviceId,
   });
