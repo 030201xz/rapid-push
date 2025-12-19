@@ -14,4 +14,5 @@ export const logger = createLogger({
 
 export const apiLogger = createLogger({namespace: 'API'});
 export const dbLogger = createLogger({namespace: 'Database'});
+export const redisLogger = createLogger({namespace: 'Redis'});
 export const trpcLogger = createLogger({namespace: 'tRPC'});

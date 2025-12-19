@@ -23,6 +23,27 @@ services:
       timeout: 5s
       retries: 5
 
+  # ============================================================================
+  # Redis
+  # ============================================================================
+  redis:
+    image: redis:8-alpine
+    container_name: rapid-s-redis
+    restart: unless-stopped
+    ports:
+      - "6382:6379"
+    volumes:
+      - rapid_s_redis_data:/data
+    # 启用密码认证
+    command: redis-server --requirepass drbesfeacvee888
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "drbesfeacvee888", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   rapid_s_pg_data:
+    driver: local
+  rapid_s_redis_data:
     driver: local

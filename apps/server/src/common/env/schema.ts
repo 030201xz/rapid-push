@@ -47,6 +47,8 @@ export const env = createEnv({
       password: z.string().default('postgres'),
       /** 数据库名 -> DATABASE_NAME */
       name: z.string().default('rapid_s'),
+      /** PostgreSQL Schema（命名空间）-> DATABASE_SCHEMA */
+      schema: z.string().optional(),
 
       /** 连接池配置 */
       pool: {
@@ -55,6 +57,24 @@ export const env = createEnv({
         /** 空闲超时 -> DATABASE_POOL_IDLE_TIMEOUT */
         idleTimeout: z.coerce.number().int().min(0).default(20),
       },
+    },
+
+    // ========== Redis 配置 ==========
+    redis: {
+      /** 主机 -> REDIS_HOST */
+      host: hostSchema.default('localhost'),
+      /** 端口 -> REDIS_PORT */
+      port: portSchema.default(6379),
+      /** 密码 -> REDIS_PASSWORD */
+      password: z.string().optional(),
+      /** 数据库编号 -> REDIS_DB */
+      db: z.coerce.number().int().min(0).max(15).default(0),
+      /** 键前缀 -> REDIS_KEY_PREFIX */
+      keyPrefix: z.string().default(''),
+      /** 连接超时毫秒数 -> REDIS_CONNECT_TIMEOUT */
+      connectTimeout: z.coerce.number().int().min(0).default(10_000),
+      /** 每次请求最大重试次数 -> REDIS_MAX_RETRIES */
+      maxRetriesPerRequest: z.coerce.number().int().min(0).default(3),
     },
   },
 });
