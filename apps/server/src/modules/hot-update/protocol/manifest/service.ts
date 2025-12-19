@@ -8,10 +8,12 @@
  * - 灰度规则匹配
  * - Manifest 构建
  * - 代码签名
+ * - Manifest Filters 生成
  */
 
 import { signManifestAsync } from '@/common/crypto';
 import type { RapidSDatabase as Database } from '@/common/database/postgresql/rapid-s';
+import { generateManifestFilters } from '@/common/utils/sfv';
 import { eq } from 'drizzle-orm';
 import * as channelService from '../../manage/channels/service';
 import * as directiveService from '../../manage/directives/service';
@@ -152,7 +154,13 @@ export async function checkUpdate(
     assetUrlPrefix
   );
 
-  // 7. 生成签名（如果渠道启用了签名）
+  // 7. 生成 Manifest Filters（基于渠道配置和更新元数据）
+  const manifestFilters = generateManifestFilters(
+    manifest.metadata,
+    (channel.manifestFilterKeys as string[]) ?? []
+  );
+
+  // 8. 生成签名（如果渠道启用了签名）
   let signature: string | undefined;
   if (channel.signingEnabled && channel.privateKey) {
     // 使用 Bun Web Crypto API 进行 RSA-SHA256 签名，返回 SFV 格式: sig=:base64:
@@ -166,6 +174,7 @@ export async function checkUpdate(
   return {
     type: RESPONSE_TYPE.UPDATE_AVAILABLE,
     manifest,
+    manifestFilters,
     signature,
   };
 }

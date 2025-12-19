@@ -17,6 +17,7 @@ import { appSchema } from '@/common/database/postgresql/rapid-s/schema';
 import {
   boolean,
   index,
+  jsonb,
   text,
   timestamp,
   unique,
@@ -43,6 +44,16 @@ export const channels = appSchema.table(
       .unique(),
     /** 渠道描述 */
     description: text('description'),
+
+    // ========== Expo Updates 协议字段 ==========
+    /**
+     * Manifest Filters 配置
+     * 指定哪些 metadata 键应该作为过滤器返回给客户端
+     * 示例：["branch", "environment", "releaseChannel"]
+     */
+    manifestFilterKeys: jsonb('manifest_filter_keys')
+      .$type<string[]>()
+      .default([]),
 
     // ========== 代码签名字段 ==========
     /** RSA 私钥（PEM 格式，加密存储） */

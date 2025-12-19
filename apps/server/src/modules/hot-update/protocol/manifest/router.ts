@@ -36,12 +36,23 @@ export const manifestRouter = router({
         assetUrlPrefix
       );
 
-      // 如果有签名，设置到响应头（符合 Expo 规范）
-      if (result.type === 'updateAvailable' && result.signature) {
-        ctx.honoContext.header(
-          'expo-signature',
-          `sig=:${result.signature}:`
-        );
+      // 如果有更新可用，设置相关响应头
+      if (result.type === 'updateAvailable') {
+        // 设置 manifest-filters（如果有）
+        if (result.manifestFilters) {
+          ctx.honoContext.header(
+            'expo-manifest-filters',
+            result.manifestFilters
+          );
+        }
+
+        // 设置签名（如果有）
+        if (result.signature) {
+          ctx.honoContext.header(
+            'expo-signature',
+            `sig=:${result.signature}:`
+          );
+        }
       }
 
       return result;

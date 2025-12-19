@@ -109,6 +109,8 @@ export interface TestContext {
   /** 签名场景使用 */
   publicKey: string;
   privateKey: string;
+  /** 端到端测试使用 */
+  testUpdateId: string;
 }
 
 /** 测试上下文文件路径 */

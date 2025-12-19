@@ -1,0 +1,1 @@
+ALTER TABLE "rapid_s"."channels" ADD COLUMN "manifest_filter_keys" jsonb DEFAULT '[]'::jsonb;

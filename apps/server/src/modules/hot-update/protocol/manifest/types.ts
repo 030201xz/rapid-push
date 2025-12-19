@@ -101,6 +101,7 @@ export type CheckUpdateResponse =
   | {
       type: typeof RESPONSE_TYPE.UPDATE_AVAILABLE;
       manifest: Manifest;
+      manifestFilters?: string; // SFV 格式的 Manifest Filters
       signature?: string; // 代码签名
     }
   | {
