@@ -8,7 +8,7 @@ import {
   errorHandler,
   requestIdMiddleware,
 } from './common/middlewares';
-import type { AppEnv } from './types';
+import type { AppEnv } from './types/index';
 
 // ========== Hono 应用（强类型环境） ==========
 const app = new Hono<AppEnv>();
