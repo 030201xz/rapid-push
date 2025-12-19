@@ -276,9 +276,10 @@ async function main() {
     const manifest = checkResult.result.data.manifest;
     const manifestJson = JSON.stringify(manifest);
 
+    // verifyManifestSignatureAsync 期望完整的 SFV 格式头
     const isValid = await verifyManifestSignatureAsync(
       manifestJson,
-      signatureParts.sig,
+      expoSignatureHeader, // 传递完整的 expo-signature 头
       publicKey
     );
 

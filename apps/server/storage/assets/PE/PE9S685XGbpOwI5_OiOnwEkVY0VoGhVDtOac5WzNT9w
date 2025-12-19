@@ -1,0 +1,9 @@
+
+// Signed Bundle Test v1.0.0
+console.log('Signed update loaded successfully!');
+export default function App() {
+  return { 
+    message: 'Hello from signed update',
+    timestamp: 1766144882350
+  };
+}
