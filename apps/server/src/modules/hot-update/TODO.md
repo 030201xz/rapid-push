@@ -6,15 +6,23 @@
 
 | 模块                 | 状态      | 说明                                 |
 | -------------------- | --------- | ------------------------------------ |
-| organizations        | ⏳ 待开发 | 组织管理                             |
-| organization-members | ⏳ 待开发 | 用户-组织多对多关联                  |
-| projects             | ⏳ 待开发 | 项目管理（依赖 organizations）       |
-| channels             | ⏳ 待开发 | 渠道管理 + 代码签名（依赖 projects） |
-| assets               | ⏳ 待开发 | 资源文件（内容寻址存储）             |
-| updates              | ⏳ 待开发 | 更新发布（依赖 channels）            |
-| update-assets        | ⏳ 待开发 | 更新-资源关联表                      |
-| directives           | ⏳ 待开发 | 指令管理（依赖 channels）            |
-| rollout-rules        | ⏳ 待开发 | 灰度规则（依赖 updates）             |
+| organizations        | ✅ 已完成 | 组织管理                             |
+| organization-members | ✅ 已完成 | 用户-组织多对多关联                  |
+| projects             | ✅ 已完成 | 项目管理（依赖 organizations）       |
+| channels             | ✅ 已完成 | 渠道管理 + 代码签名（依赖 projects） |
+| assets               | ✅ 已完成 | 资源文件（内容寻址存储）             |
+| updates              | ✅ 已完成 | 更新发布（依赖 channels）            |
+| update-assets        | ✅ 已完成 | 更新-资源关联表                      |
+| directives           | ✅ 已完成 | 指令管理（依赖 channels）            |
+| rollout-rules        | ✅ 已完成 | 灰度规则（依赖 updates）             |
+
+## 初始化脚本
+
+| 任务                       | 状态      | 说明                           |
+| -------------------------- | --------- | ------------------------------ |
+| 0-env.ts ID 配置           | ✅ 已完成 | 添加 Organization/Project/Channel IDs |
+| 02-hot-update 配置目录     | ✅ 已完成 | 演示组织、项目、渠道配置       |
+| init-all.ts 更新           | ✅ 已完成 | 集成热更新模块初始化           |
 
 ## 数据模型关系
 

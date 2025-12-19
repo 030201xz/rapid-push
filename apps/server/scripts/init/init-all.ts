@@ -8,6 +8,9 @@
  * 3. 角色权限映射 (role_permission_mappings)
  * 4. 用户 (users)
  * 5. 用户角色映射 (user_role_mappings)
+ * 6. 组织 (organizations) - hot-update
+ * 7. 项目 (projects) - hot-update
+ * 8. 渠道 (channels) - hot-update
  *
  * 运行方式: bun scripts/init/init-all.ts
  */
@@ -17,15 +20,29 @@ import { rolePermissionMappings } from '@/modules/core/access-control/role-permi
 import { roles as rolesTable } from '@/modules/core/access-control/roles/schema';
 import { userRoleMappings } from '@/modules/core/access-control/user-role-mappings/schema';
 import { users as usersTable } from '@/modules/core/identify/users/schema';
+import { channels as channelsTable } from '@/modules/hot-update/channels/schema';
+import { organizations as organizationsTable } from '@/modules/hot-update/organizations/schema';
+import { projects as projectsTable } from '@/modules/hot-update/projects/schema';
 import { sql } from 'drizzle-orm';
-import { PermissionIds, RoleIds, UserIds } from './0-env';
+import {
+  ChannelIds,
+  OrganizationIds,
+  PermissionIds,
+  ProjectIds,
+  RoleIds,
+  UserIds,
+} from './0-env';
 import {
   closeDbConnection,
   getDb,
   hashPassword,
   logger,
 } from './_lib';
-import { initConfig, type IdMaps } from './config';
+import { initConfig, type IdMaps } from './config/01-core';
+import {
+  hotUpdateConfig,
+  type HotUpdateIdMaps,
+} from './config/02-hot-update';
 
 // ============================================================================
 // ID 映射表初始化
@@ -45,6 +62,24 @@ function createIdMaps(): IdMaps {
     ),
     users: new Map(
       Object.entries(UserIds) as [keyof typeof UserIds, string][]
+    ),
+  };
+}
+
+/** 创建 Hot Update ID 映射表 */
+function createHotUpdateIdMaps(): HotUpdateIdMaps {
+  return {
+    organizations: new Map(
+      Object.entries(OrganizationIds) as [
+        keyof typeof OrganizationIds,
+        string
+      ][]
+    ),
+    projects: new Map(
+      Object.entries(ProjectIds) as [keyof typeof ProjectIds, string][]
+    ),
+    channels: new Map(
+      Object.entries(ChannelIds) as [keyof typeof ChannelIds, string][]
     ),
   };
 }
@@ -236,6 +271,142 @@ async function insertUserRoleMappings(idMaps: IdMaps): Promise<void> {
 }
 
 // ============================================================================
+// Hot Update 数据插入函数
+// ============================================================================
+
+/** 插入组织数据 */
+async function insertOrganizations(
+  coreIdMaps: IdMaps,
+  hotUpdateIdMaps: HotUpdateIdMaps
+): Promise<void> {
+  logger.info('创建组织...');
+  const db = getDb();
+
+  for (const org of hotUpdateConfig.organizations) {
+    const { key, ownerKey, ...data } = org;
+    const id = hotUpdateIdMaps.organizations.get(key);
+    const ownerId = coreIdMaps.users.get(ownerKey);
+
+    if (!id) {
+      logger.error(`组织 ID 未定义: ${key}，请在 0-env.ts 中配置`);
+      continue;
+    }
+    if (!ownerId) {
+      logger.error(`用户 ID 未找到: ${ownerKey}`);
+      continue;
+    }
+
+    // upsert: 按 slug 唯一约束处理冲突
+    await db
+      .insert(organizationsTable)
+      .values({ id, ownerId, ...data })
+      .onConflictDoUpdate({
+        target: organizationsTable.slug,
+        set: {
+          name: data.name,
+          description: data.description,
+          ownerId,
+          updatedAt: sql`now()`,
+        },
+      });
+
+    logger.debug(`  ✓ ${data.name} (${data.slug})`);
+  }
+
+  logger.info(
+    `组织创建完成，共 ${hotUpdateConfig.organizations.length} 条`
+  );
+}
+
+/** 插入项目数据 */
+async function insertProjects(
+  hotUpdateIdMaps: HotUpdateIdMaps
+): Promise<void> {
+  logger.info('创建项目...');
+  const db = getDb();
+
+  for (const project of hotUpdateConfig.projects) {
+    const { key, organizationKey, ...data } = project;
+    const id = hotUpdateIdMaps.projects.get(key);
+    const organizationId = hotUpdateIdMaps.organizations.get(organizationKey);
+
+    if (!id) {
+      logger.error(`项目 ID 未定义: ${key}，请在 0-env.ts 中配置`);
+      continue;
+    }
+    if (!organizationId) {
+      logger.error(`组织 ID 未找到: ${organizationKey}`);
+      continue;
+    }
+
+    // upsert: 按 (organizationId, slug) 组合唯一约束
+    await db
+      .insert(projectsTable)
+      .values({ id, organizationId, ...data })
+      .onConflictDoUpdate({
+        target: [projectsTable.organizationId, projectsTable.slug],
+        set: {
+          name: data.name,
+          description: data.description,
+          updatedAt: sql`now()`,
+        },
+      });
+
+    logger.debug(`  ✓ ${data.name} (${data.slug})`);
+  }
+
+  logger.info(
+    `项目创建完成，共 ${hotUpdateConfig.projects.length} 条`
+  );
+}
+
+/** 插入渠道数据 */
+async function insertChannels(
+  hotUpdateIdMaps: HotUpdateIdMaps
+): Promise<void> {
+  logger.info('创建渠道...');
+  const db = getDb();
+
+  for (const channel of hotUpdateConfig.channels) {
+    const { key, projectKey, presetChannelKey, ...data } = channel;
+    const id = hotUpdateIdMaps.channels.get(key);
+    const projectId = hotUpdateIdMaps.projects.get(projectKey);
+
+    if (!id) {
+      logger.error(`渠道 ID 未定义: ${key}，请在 0-env.ts 中配置`);
+      continue;
+    }
+    if (!projectId) {
+      logger.error(`项目 ID 未找到: ${projectKey}`);
+      continue;
+    }
+
+    // 生成或使用预定义的渠道密钥
+    const channelKey =
+      presetChannelKey ?? `${data.name}_${id.slice(0, 8)}`;
+
+    // upsert: 按 (projectId, name) 组合唯一约束
+    await db
+      .insert(channelsTable)
+      .values({ id, projectId, channelKey, ...data })
+      .onConflictDoUpdate({
+        target: [channelsTable.projectId, channelsTable.name],
+        set: {
+          description: data.description,
+          signingEnabled: data.signingEnabled,
+          updatedAt: sql`now()`,
+        },
+      });
+
+    logger.debug(`  ✓ ${data.name} (key: ${channelKey})`);
+  }
+
+  logger.info(
+    `渠道创建完成，共 ${hotUpdateConfig.channels.length} 条`
+  );
+}
+
+// ============================================================================
 // 主函数
 // ============================================================================
 
@@ -243,14 +414,22 @@ async function main(): Promise<void> {
   logger.info('开始初始化数据...\n');
 
   const idMaps = createIdMaps();
+  const hotUpdateIdMaps = createHotUpdateIdMaps();
 
   try {
-    // 按依赖顺序插入
+    // 按依赖顺序插入 - Core 模块
+    logger.info('========== Core 模块 ==========');
     await insertPermissions(idMaps);
     await insertRoles(idMaps);
     await insertRolePermissionMappings(idMaps);
     await insertUsers(idMaps);
     await insertUserRoleMappings(idMaps);
+
+    // 按依赖顺序插入 - Hot Update 模块
+    logger.info('\n========== Hot Update 模块 ==========');
+    await insertOrganizations(idMaps, hotUpdateIdMaps);
+    await insertProjects(hotUpdateIdMaps);
+    await insertChannels(hotUpdateIdMaps);
 
     logger.info('\n✅ 数据初始化完成！');
   } catch (error) {

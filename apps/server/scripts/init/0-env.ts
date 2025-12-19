@@ -86,3 +86,42 @@ export const UserIds = {
 
 /** 用户 Key 类型 */
 export type UserKey = keyof typeof UserIds;
+
+// ============================================================================
+// Hot Update 模块 ID 配置
+// ============================================================================
+
+/**
+ * 组织 ID 配置
+ */
+export const OrganizationIds = {
+  /** 默认演示组织 */
+  DEMO_ORG: 'a1b2c3d4-e5f6-4a7b-8c9d-600000000001',
+} as const;
+
+/** 组织 Key 类型 */
+export type OrganizationKey = keyof typeof OrganizationIds;
+
+/**
+ * 项目 ID 配置
+ */
+export const ProjectIds = {
+  /** 演示项目 */
+  DEMO_PROJECT: 'a1b2c3d4-e5f6-4a7b-8c9d-700000000001',
+} as const;
+
+/** 项目 Key 类型 */
+export type ProjectKey = keyof typeof ProjectIds;
+
+/**
+ * 渠道 ID 配置
+ */
+export const ChannelIds = {
+  /** 生产环境渠道 */
+  PRODUCTION: 'a1b2c3d4-e5f6-4a7b-8c9d-800000000001',
+  /** 预发布环境渠道 */
+  STAGING: 'a1b2c3d4-e5f6-4a7b-8c9d-800000000002',
+} as const;
+
+/** 渠道 Key 类型 */
+export type ChannelKey = keyof typeof ChannelIds;

@@ -8,7 +8,7 @@
 import type { NewPermission } from '@/modules/core/access-control/permissions/schema';
 import type { NewRole } from '@/modules/core/access-control/roles/schema';
 import type { NewUser } from '@/modules/core/identify/users/schema';
-import type { PermissionKey, RoleKey, UserKey } from '../0-env';
+import type { PermissionKey, RoleKey, UserKey } from '../../0-env';
 
 // ============================================================================
 // 权限配置
