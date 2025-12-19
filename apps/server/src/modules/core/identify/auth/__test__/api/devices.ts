@@ -154,7 +154,8 @@ async function main() {
     accessToken = await loginWithDevice(client);
 
     // 2. 获取设备列表
-    await testGetDevices(accessToken);
+    const devices = await testGetDevices(accessToken);
+    logger.info('设备列表', { devices });
 
     // 3. 验证设备信息完整性
     await testDeviceInfoIntegrity(accessToken);
