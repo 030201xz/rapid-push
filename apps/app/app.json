@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "updates": {
       "enabled": true,
-      "url": "http://192.168.8.114:3000/manifests/ch_i2h8yaNCz8kNRxKTLRzfPK5RvJ2NCjJh",
+      "url": "http://192.168.8.114:6688/manifests/ch_i2h8yaNCz8kNRxKTLRzfPK5RvJ2NCjJh",
       "fallbackToCacheTimeout": 0
     },
     "ios": {
