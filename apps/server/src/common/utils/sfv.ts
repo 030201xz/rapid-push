@@ -35,8 +35,8 @@ export function toSfvDictionary(
 
       // 转义字符串值中的特殊字符
       const escapedValue = value
-        .replace(/\\/g, '\\\\')  // 反斜杠
-        .replace(/"/g, '\\"');   // 双引号
+        .replace(/\\/g, '\\\\') // 反斜杠
+        .replace(/"/g, '\\"'); // 双引号
 
       return `${key}="${escapedValue}"`;
     })
@@ -67,9 +67,7 @@ export function fromSfvDictionary(
     const [, key, value] = match;
     if (!key || value === undefined) continue;
     // 反转义
-    result[key] = value
-      .replace(/\\"/g, '"')
-      .replace(/\\\\/g, '\\');
+    result[key] = value.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
   }
 
   return result;

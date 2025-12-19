@@ -101,6 +101,7 @@ export const updateChannelSchema = createInsertSchema(channels)
   .pick({
     name: true,
     description: true,
+    manifestFilterKeys: true,
   })
   .partial();
 
@@ -111,5 +112,5 @@ export const selectChannelSchema = createSelectSchema(channels);
 export type Channel = typeof channels.$inferSelect;
 export type NewChannel = typeof channels.$inferInsert;
 export type UpdateChannel = Partial<
-  Pick<NewChannel, 'name' | 'description'>
+  Pick<NewChannel, 'name' | 'description' | 'manifestFilterKeys'>
 >;

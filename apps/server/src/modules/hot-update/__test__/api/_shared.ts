@@ -111,6 +111,9 @@ export interface TestContext {
   privateKey: string;
   /** 端到端测试使用 */
   testUpdateId: string;
+  /** Manifest Filters 场景使用 */
+  filterKeys: string[];
+  testMetadata: Record<string, string>;
 }
 
 /** 测试上下文文件路径 */
@@ -148,6 +151,20 @@ export async function clearTestContext() {
   } catch {
     // 忽略错误
   }
+}
+
+/**
+ * 重置测试上下文中的特定字段
+ * @param fields 要清除的字段列表
+ */
+export async function resetTestContext(
+  fields: (keyof TestContext)[]
+) {
+  const existing = await loadTestContext();
+  for (const field of fields) {
+    delete existing[field];
+  }
+  await Bun.write(CONTEXT_FILE, JSON.stringify(existing, null, 2));
 }
 
 // ========== 重导出 ==========

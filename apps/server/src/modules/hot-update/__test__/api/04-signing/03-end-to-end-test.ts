@@ -42,17 +42,20 @@ function generateKeyPair(): {
   publicKey: string;
   privateKey: string;
 } {
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
-    publicKeyEncoding: {
-      type: 'spki',
-      format: 'pem',
-    },
-    privateKeyEncoding: {
-      type: 'pkcs8',
-      format: 'pem',
-    },
-  });
+  const { publicKey, privateKey } = crypto.generateKeyPairSync(
+    'rsa',
+    {
+      modulusLength: 2048,
+      publicKeyEncoding: {
+        type: 'spki',
+        format: 'pem',
+      },
+      privateKeyEncoding: {
+        type: 'pkcs8',
+        format: 'pem',
+      },
+    }
+  );
 
   return { publicKey, privateKey };
 }
@@ -61,7 +64,9 @@ function generateKeyPair(): {
  * 创建测试 Bundle（ZIP 格式）
  */
 async function createTestBundle(): Promise<Buffer> {
-  const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+  const { mkdtempSync, writeFileSync, rmSync } = await import(
+    'node:fs'
+  );
   const { join } = await import('node:path');
   const { execSync } = await import('node:child_process');
   const { tmpdir } = await import('node:os');
@@ -84,7 +89,9 @@ export default function App() {
   writeFileSync(join(tmpDir, 'index.bundle'), bundleContent);
 
   // 使用系统 zip 命令打包
-  execSync(`cd ${tmpDir} && zip -r ${zipPath} .`, { stdio: 'ignore' });
+  execSync(`cd ${tmpDir} && zip -r ${zipPath} .`, {
+    stdio: 'ignore',
+  });
 
   // 读取 ZIP 文件
   const zipBuffer = await Bun.file(zipPath).arrayBuffer();
@@ -191,7 +198,9 @@ async function main() {
 
     if (!uploadResponse.ok) {
       throw new Error(
-        `Upload failed: ${uploadResponse.status} ${await uploadResponse.text()}`
+        `Upload failed: ${
+          uploadResponse.status
+        } ${await uploadResponse.text()}`
       );
     }
 
@@ -230,13 +239,16 @@ async function main() {
         'expo-protocol-version': '1',
         'expo-platform': 'ios',
         'expo-runtime-version': '1.0.0',
-        'expo-expect-signature': 'sig, keyid="root", alg="rsa-v1_5-sha256"',
+        'expo-expect-signature':
+          'sig, keyid="root", alg="rsa-v1_5-sha256"',
       },
     });
 
     if (!checkResponse.ok) {
       throw new Error(
-        `Check update failed: ${checkResponse.status} ${await checkResponse.text()}`
+        `Check update failed: ${
+          checkResponse.status
+        } ${await checkResponse.text()}`
       );
     }
 
@@ -244,7 +256,8 @@ async function main() {
     logger.info('\n📝 步骤 4: 验证响应头');
     logger.info('-'.repeat(60));
 
-    const expoSignatureHeader = checkResponse.headers.get('expo-signature');
+    const expoSignatureHeader =
+      checkResponse.headers.get('expo-signature');
     if (!expoSignatureHeader) {
       throw new Error('❌ 缺少 expo-signature 响应头');
     }

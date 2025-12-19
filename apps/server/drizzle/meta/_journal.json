@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1766135472921,
-      "tag": "0000_lethal_rawhide_kid",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1766144230476,
-      "tag": "0001_flowery_post",
+      "when": 1766145844274,
+      "tag": "0000_gifted_hawkeye",
       "breakpoints": true
     }
   ]

@@ -45,7 +45,10 @@ async function compressData(
     const compressed = Bun.gzipSync(buffer);
     return new Uint8Array(compressed);
   } catch (error) {
-    console.error(`[Compression] Failed to compress with ${type}:`, error);
+    console.error(
+      `[Compression] Failed to compress with ${type}:`,
+      error
+    );
     return data; // 压缩失败则返回原始数据
   }
 }
@@ -87,7 +90,10 @@ export function registerAssetRoutes<E extends Env = Env>(
       const rawData = new Uint8Array(result.content);
 
       // 压缩数据（如果支持）
-      const compressedData = await compressData(rawData, compressionType);
+      const compressedData = await compressData(
+        rawData,
+        compressionType
+      );
 
       // 设置响应头（符合 Expo 规范）
       c.header('content-type', result.contentType);

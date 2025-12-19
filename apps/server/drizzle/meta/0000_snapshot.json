@@ -1,5 +1,5 @@
 {
-  "id": "10068b47-a9af-4cd2-b946-54a61f200612",
+  "id": "200a87b3-6532-474a-8f3c-875f82b9ab7a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -966,6 +966,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "manifest_filter_keys": {
+          "name": "manifest_filter_keys",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
         },
         "private_key": {
           "name": "private_key",

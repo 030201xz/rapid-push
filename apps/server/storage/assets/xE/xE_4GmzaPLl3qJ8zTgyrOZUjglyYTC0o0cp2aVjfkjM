@@ -1,0 +1,3 @@
+// Filters Test Bundle
+console.log('Filters test bundle loaded');
+export default { message: 'Hello from filters test' };

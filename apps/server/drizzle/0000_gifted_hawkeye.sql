@@ -85,6 +85,7 @@ CREATE TABLE "rapid_s"."channels" (
 	"name" varchar(50) NOT NULL,
 	"channel_key" varchar(64) NOT NULL,
 	"description" text,
+	"manifest_filter_keys" jsonb DEFAULT '[]'::jsonb,
 	"private_key" text,
 	"public_key" text,
 	"signing_enabled" boolean DEFAULT false NOT NULL,
