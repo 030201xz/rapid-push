@@ -166,8 +166,12 @@ async function main() {
     // 提取可读的错误信息，避免 JSON 序列化丢失信息
     const errorMessage =
       error instanceof Error ? error.message : String(error);
-    const errorStack = error instanceof Error ? error.stack : undefined;
-    logger.error('测试失败', { error: errorMessage, stack: errorStack });
+    const errorStack =
+      error instanceof Error ? error.stack : undefined;
+    logger.error('测试失败', {
+      error: errorMessage,
+      stack: errorStack,
+    });
     process.exitCode = 1;
   }
 }
