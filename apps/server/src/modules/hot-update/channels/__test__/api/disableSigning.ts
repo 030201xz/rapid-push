@@ -287,12 +287,12 @@ async function testCannotGetPublicKeyAfterDisable(
   const authedClient = createClient(API_URL, { token: accessToken });
   const channelsApi = getChannelsApi(authedClient);
 
-  const result = await channelsApi.getPublicKey.query({
+  const publicKey = await channelsApi.getPublicKey.query({
     id: channelId,
   });
 
   // 禁用签名后，公钥应该为空或返回 null
-  if (result && result.publicKey) {
+  if (publicKey) {
     throw new Error('禁用签名后不应该能获取公钥');
   }
 
@@ -325,7 +325,7 @@ async function testDisableSigningOnUnsignedChannel(
     });
 
     // 应该成功执行，signingEnabled 保持 false
-    if (result.signingEnabled !== false) {
+    if (!result || result.signingEnabled !== false) {
       throw new Error('未启用签名的渠道禁用后应该仍为 false');
     }
 

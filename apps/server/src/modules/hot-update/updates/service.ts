@@ -6,12 +6,17 @@
  */
 
 import type { RapidSDatabase as Database } from '@/common/database/postgresql/rapid-s';
+import { LocalStorageProvider } from '@/common/storage';
 import { and, desc, eq, sql } from 'drizzle-orm';
+import type { NewAsset } from '../assets/schema';
+import * as assetService from '../assets/service';
+import * as updateAssetService from '../update-assets/service';
 import {
   updates,
   type NewUpdate,
   type UpdateSettings,
 } from './schema';
+import { extractBundle } from './utils';
 
 // ========== 查询操作 ==========
 
@@ -188,4 +193,126 @@ export type UpdateSettingsResult = Awaited<
 /** 删除更新返回类型 */
 export type DeleteUpdateResult = Awaited<
   ReturnType<typeof deleteUpdate>
+>;
+
+// ========== Bundle 上传 ==========
+
+/**
+ * 上传 Bundle 参数
+ */
+export interface UploadBundleParams {
+  /** 渠道 ID */
+  channelId: string;
+  /** 运行时版本 */
+  runtimeVersion: string;
+  /** 更新描述 */
+  description?: string;
+  /** 元数据 */
+  metadata?: Record<string, string>;
+  /** 额外信息 */
+  extra?: Record<string, unknown>;
+  /** 灰度比例（0-100） */
+  rolloutPercentage?: number;
+  /** Bundle ZIP 文件 Buffer */
+  bundleBuffer: Buffer;
+}
+
+/**
+ * 上传 Bundle 并创建更新
+ *
+ * 处理流程：
+ * 1. 解压 ZIP 文件，提取资源
+ * 2. 计算资源哈希，去重存储
+ * 3. 创建更新记录
+ * 4. 创建更新-资源关联
+ */
+export async function uploadBundle(
+  db: Database,
+  params: UploadBundleParams
+) {
+  const {
+    channelId,
+    runtimeVersion,
+    description,
+    metadata,
+    extra,
+    rolloutPercentage = 100,
+    bundleBuffer,
+  } = params;
+
+  // 1. 解压 Bundle
+  const { assets: extractedAssets } = await extractBundle(
+    bundleBuffer
+  );
+
+  // 2. 存储资源并创建记录
+  const storage = LocalStorageProvider.getInstance();
+  const assetIdMap = new Map<string, string>(); // hash -> assetId
+
+  for (const extracted of extractedAssets) {
+    // 检查资源是否已存在
+    const existing = await assetService.getAssetByHash(
+      db,
+      extracted.hash
+    );
+
+    if (existing) {
+      // 已存在，直接使用
+      assetIdMap.set(extracted.hash, existing.id);
+    } else {
+      // 不存在，上传到存储并创建记录
+      const storagePath = await storage.upload(
+        extracted.content,
+        extracted.hash,
+        extracted.contentType
+      );
+
+      const newAsset: NewAsset = {
+        hash: extracted.hash,
+        key: extracted.key,
+        contentType: extracted.contentType,
+        fileExtension: extracted.fileExtension,
+        storagePath,
+        size: extracted.size,
+      };
+
+      const asset = await assetService.createAsset(db, newAsset);
+      assetIdMap.set(extracted.hash, asset.id);
+    }
+  }
+
+  // 3. 创建更新记录
+  const [update] = await db
+    .insert(updates)
+    .values({
+      channelId,
+      runtimeVersion,
+      description,
+      metadata: metadata ?? {},
+      extra: extra ?? {},
+      rolloutPercentage,
+    })
+    .returning();
+
+  if (!update) throw new Error('创建更新失败');
+
+  // 4. 创建更新-资源关联
+  const updateAssetData = extractedAssets.map(extracted => ({
+    updateId: update.id,
+    assetId: assetIdMap.get(extracted.hash)!,
+    isLaunchAsset: extracted.isLaunchAsset,
+    platform: extracted.platform,
+  }));
+
+  await updateAssetService.createUpdateAssets(db, updateAssetData);
+
+  return {
+    update,
+    assetCount: extractedAssets.length,
+  };
+}
+
+/** Bundle 上传返回类型 */
+export type UploadBundleResult = Awaited<
+  ReturnType<typeof uploadBundle>
 >;

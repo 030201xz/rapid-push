@@ -98,6 +98,64 @@ export async function deleteAsset(db: Database, id: string) {
   return result.length > 0;
 }
 
+// ========== 资源下载 ==========
+
+import { LocalStorageProvider } from '@/common/storage';
+
+/**
+ * 获取资源内容
+ *
+ * @param hash - 资源哈希
+ * @returns 资源内容 Buffer 或 null
+ */
+export async function getAssetContent(
+  db: Database,
+  hash: string
+): Promise<{
+  content: Buffer;
+  contentType: string;
+  size: number;
+} | null> {
+  const asset = await getAssetByHash(db, hash);
+  if (!asset) return null;
+
+  const storage = LocalStorageProvider.getInstance();
+  const content = await storage.download(asset.storagePath);
+
+  return {
+    content,
+    contentType: asset.contentType,
+    size: asset.size,
+  };
+}
+
+/**
+ * 获取资源流（用于大文件传输）
+ *
+ * @param hash - 资源哈希
+ * @returns ReadableStream 或 null
+ */
+export async function getAssetStream(
+  db: Database,
+  hash: string
+): Promise<{
+  stream: ReadableStream<Uint8Array>;
+  contentType: string;
+  size: number;
+} | null> {
+  const asset = await getAssetByHash(db, hash);
+  if (!asset) return null;
+
+  const storage = LocalStorageProvider.getInstance();
+  const stream = await storage.getStream(asset.storagePath);
+
+  return {
+    stream,
+    contentType: asset.contentType,
+    size: asset.size,
+  };
+}
+
 // ========== 类型导出（从函数推断，零维护成本） ==========
 
 /** 资源列表返回类型 */

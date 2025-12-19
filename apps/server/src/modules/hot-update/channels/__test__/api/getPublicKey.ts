@@ -1,15 +1,17 @@
 /**
- * 渠道代码签名密钥设置 API 测试
+ * 渠道获取公钥 API 测试
  *
  * 测试流程：
  * 1. 使用已初始化的系统管理员登录获取 Token
  * 2. 创建测试组织、项目和渠道
- * 3. 调用 setSigningKeys 设置代码签名密钥对
- * 4. 验证签名已启用且公钥可获取
- * 5. 测试更新签名密钥
- * 6. 清理测试数据
+ * 3. 测试未启用签名时获取公钥
+ * 4. 设置签名密钥
+ * 5. 测试获取公钥
+ * 6. 验证公钥格式正确
+ * 7. 测试获取不存在渠道的公钥
+ * 8. 清理测试数据
  *
- * 运行: bun run src/modules/hot-update/channels/__test__/api/setSigningKeys.ts
+ * 运行: bun run src/modules/hot-update/channels/__test__/api/getPublicKey.ts
  */
 
 import { env } from '@/common/env';
@@ -18,7 +20,7 @@ import { createLogger } from '@rapid-s/logger';
 
 // ========== Logger 实例 ==========
 const logger = createLogger({
-  namespace: 'Test:ChannelSetSigningKeys',
+  namespace: 'Test:ChannelGetPublicKey',
 });
 
 // ========== 测试配置 ==========
@@ -35,23 +37,23 @@ const ADMIN_USER = {
 const TEST_ORGANIZATION = {
   name: `测试组织_${Date.now()}`,
   slug: `test-org-${Date.now()}`,
-  description: '用于渠道 setSigningKeys 测试的组织',
+  description: '用于渠道 getPublicKey 测试的组织',
 };
 
 // 测试项目
 const TEST_PROJECT = {
   name: `测试项目_${Date.now()}`,
   slug: `test-project-${Date.now()}`,
-  description: '用于渠道 setSigningKeys 测试的项目',
+  description: '用于渠道 getPublicKey 测试的项目',
 };
 
 // 测试渠道
 const TEST_CHANNEL = {
   name: 'production',
-  description: '用于 setSigningKeys 测试的渠道',
+  description: '用于 getPublicKey 测试的渠道',
 };
 
-// 测试签名密钥（模拟 RSA 密钥对，实际使用时应生成真实密钥）
+// 测试签名密钥
 const TEST_SIGNING_KEYS = {
   publicKey: `-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0Z3VS5JJcds3xfn/ygWyRQ0JEcKwY7Zj
@@ -68,26 +70,6 @@ cmzgn1M/srxd3LdbQfzEr0nR1Lwn1PsrxdfTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn
 1Psrx1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn1Psr
 x1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1AgMBAAECggEA
 TestPrivateKeyContentHereForDemoOnly0000000000000000000000000000000000000000000
------END PRIVATE KEY-----`,
-};
-
-// 第二套测试签名密钥（用于测试更新）
-const TEST_SIGNING_KEYS_2 = {
-  publicKey: `-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEB1Z3VS5JJcds3xfn/ygWyRQ0JEcKwY7Zj
-OT0kS8bLrHpT0L3lJYxSGVYdQK8oMsJ9Z8/2TfmUYcl5qA5Kq6JNZJ7hf3gy8T8dU3H0Z3Js4J9T
-P7K8Xdy3W0H8xK9J0dS8J9T7K8dX0yT3W0H8xK9J0dS8J9T7K8dX0yT3W0H8xK9J0dS8J9T7K8dX
-0yT3W0H8xK9J0dS8J9T7K8dX0yT3W0H8xK9J0dS8J9T7K8dX0yT3W0H8xK9J0dS8J9T7K8dX0yT3
-W0H8xK9J0dS8J9T7K8dX0yT3W0H8xK9J0dS8J9T7K8dX0yT3W0H8xK9J0dS8J9T7K8dX0yT3W0H8
-xK9J0dS8J9QIDAQAB
------END PUBLIC KEY-----`,
-  privateKey: `-----BEGIN PRIVATE KEY-----
-MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQHVndVLkklx2zfF+f/KBbJFDQkR
-wrBjtmM5PSRLxsuselnQveUljFIZVh1ArygywnlnT/ZN+ZRhyXmoD0qrok1knuF/eDLxPx1TcfRn
-cmzgn1M/srxd3LdbQfzEr0nR1Lwn1PsrxdfTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn
-1Psrx1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn1Psr
-x1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1Lwn1Psrx1fTJPdbQfzEr0nR1AgMBAAECggEA
-UpdatedPrivateKeyContentHereForDemo0000000000000000000000000000000000000000000
 -----END PRIVATE KEY-----`,
 };
 
@@ -188,42 +170,40 @@ async function createTestChannel(
   logger.info('测试渠道创建成功', {
     id: newChannel.id,
     name: newChannel.name,
-    signingEnabled: newChannel.signingEnabled,
   });
 
   return newChannel;
 }
 
-/** 验证初始状态（签名未启用） */
-async function verifyInitialState(
+/** 测试未启用签名时获取公钥 */
+async function testGetPublicKeyWithoutSigning(
   accessToken: string,
   channelId: string
 ) {
-  logger.info('验证初始状态（签名未启用）...', { channelId });
+  logger.info('测试未启用签名时获取公钥...', { channelId });
 
   const authedClient = createClient(API_URL, { token: accessToken });
   const channelsApi = getChannelsApi(authedClient);
 
-  const channel = await channelsApi.byId.query({ id: channelId });
+  const publicKey = await channelsApi.getPublicKey.query({
+    id: channelId,
+  });
 
-  if (!channel) {
-    throw new Error('渠道不存在');
+  // 未启用签名时，应该返回 null
+  if (publicKey) {
+    throw new Error('未启用签名时不应该有公钥');
   }
 
-  if (channel.signingEnabled !== false) {
-    throw new Error('初始状态签名应该未启用');
-  }
-
-  logger.info('验证成功：初始状态签名未启用');
-  return channel;
+  logger.info('验证成功：未启用签名时公钥为空');
+  return publicKey;
 }
 
-/** 测试设置签名密钥 */
-async function testSetSigningKeys(
+/** 设置签名密钥 */
+async function setSigningKeys(
   accessToken: string,
   channelId: string
 ) {
-  logger.info('测试设置签名密钥...', { channelId });
+  logger.info('设置签名密钥...', { channelId });
 
   const authedClient = createClient(API_URL, { token: accessToken });
   const channelsApi = getChannelsApi(authedClient);
@@ -234,45 +214,12 @@ async function testSetSigningKeys(
     privateKey: TEST_SIGNING_KEYS.privateKey,
   });
 
-  // 验证返回结果
-  if (!result) {
-    throw new Error('设置签名密钥失败：未返回结果');
+  if (!result || result.signingEnabled !== true) {
+    throw new Error('设置签名密钥失败');
   }
 
-  if (result.signingEnabled !== true) {
-    throw new Error('设置签名密钥后，signingEnabled 应该为 true');
-  }
-
-  logger.info('签名密钥设置成功', {
-    channelId: result.id,
-    signingEnabled: result.signingEnabled,
-  });
-
+  logger.info('签名密钥设置成功');
   return result;
-}
-
-/** 验证签名已启用 */
-async function verifySigningEnabled(
-  accessToken: string,
-  channelId: string
-) {
-  logger.info('验证签名已启用...', { channelId });
-
-  const authedClient = createClient(API_URL, { token: accessToken });
-  const channelsApi = getChannelsApi(authedClient);
-
-  const channel = await channelsApi.byId.query({ id: channelId });
-
-  if (!channel) {
-    throw new Error('渠道不存在');
-  }
-
-  if (channel.signingEnabled !== true) {
-    throw new Error('签名应该已启用');
-  }
-
-  logger.info('验证成功：签名已启用');
-  return channel;
 }
 
 /** 测试获取公钥 */
@@ -289,60 +236,109 @@ async function testGetPublicKey(
     id: channelId,
   });
 
+  // 验证返回了公钥
   if (!publicKey) {
     throw new Error('获取公钥失败：未返回公钥');
   }
 
-  // 验证公钥内容（应该包含 BEGIN PUBLIC KEY）
-  if (!publicKey.includes('BEGIN PUBLIC KEY')) {
-    throw new Error('获取的公钥格式不正确');
-  }
-
   logger.info('公钥获取成功', {
-    publicKeyPreview: publicKey.substring(0, 50) + '...',
+    publicKeyLength: publicKey.length,
   });
 
   return publicKey;
 }
 
-/** 测试更新签名密钥 */
-async function testUpdateSigningKeys(
+/** 验证公钥格式 */
+async function verifyPublicKeyFormat(
   accessToken: string,
   channelId: string
 ) {
-  logger.info('测试更新签名密钥...', { channelId });
+  logger.info('验证公钥格式...', { channelId });
 
   const authedClient = createClient(API_URL, { token: accessToken });
   const channelsApi = getChannelsApi(authedClient);
 
-  const result = await channelsApi.setSigningKeys.mutate({
+  const publicKey = await channelsApi.getPublicKey.query({
     id: channelId,
-    publicKey: TEST_SIGNING_KEYS_2.publicKey,
-    privateKey: TEST_SIGNING_KEYS_2.privateKey,
+  });
+
+  if (!publicKey) {
+    throw new Error('获取公钥失败');
+  }
+
+  // 验证 PEM 格式
+  if (!publicKey.includes('-----BEGIN PUBLIC KEY-----')) {
+    throw new Error('公钥格式错误：缺少 BEGIN PUBLIC KEY 标记');
+  }
+
+  if (!publicKey.includes('-----END PUBLIC KEY-----')) {
+    throw new Error('公钥格式错误：缺少 END PUBLIC KEY 标记');
+  }
+
+  // 验证公钥内容与设置的一致
+  if (publicKey !== TEST_SIGNING_KEYS.publicKey) {
+    throw new Error('获取的公钥与设置的不一致');
+  }
+
+  logger.info('公钥格式验证成功', {
+    hasBeginMarker: publicKey.includes('-----BEGIN PUBLIC KEY-----'),
+    hasEndMarker: publicKey.includes('-----END PUBLIC KEY-----'),
+  });
+
+  return publicKey;
+}
+
+/** 测试获取不存在渠道的公钥 */
+async function testGetPublicKeyNonExistent(accessToken: string) {
+  logger.info('测试获取不存在渠道的公钥...');
+
+  const authedClient = createClient(API_URL, { token: accessToken });
+  const channelsApi = getChannelsApi(authedClient);
+
+  // 使用一个随机 UUID
+  const nonExistentId = '00000000-0000-0000-0000-000000000000';
+  const result = await channelsApi.getPublicKey.query({
+    id: nonExistentId,
+  });
+
+  // 不存在的渠道应该返回 null
+  if (result !== null) {
+    throw new Error('获取不存在渠道的公钥应该返回 null');
+  }
+
+  logger.info('验证成功：不存在的渠道返回 null');
+}
+
+/** 测试公钥不会返回私钥信息 */
+async function testNoPrivateKeyExposure(
+  accessToken: string,
+  channelId: string
+) {
+  logger.info('测试公钥不会返回私钥信息...', { channelId });
+
+  const authedClient = createClient(API_URL, { token: accessToken });
+  const channelsApi = getChannelsApi(authedClient);
+
+  const result = await channelsApi.getPublicKey.query({
+    id: channelId,
   });
 
   if (!result) {
-    throw new Error('更新签名密钥失败');
+    throw new Error('获取公钥失败');
   }
 
-  if (result.signingEnabled !== true) {
-    throw new Error('更新后签名应该仍然启用');
+  // 验证响应中不包含私钥
+  const resultStr = JSON.stringify(result);
+
+  if (resultStr.includes('PRIVATE KEY')) {
+    throw new Error('安全风险：响应中包含私钥信息');
   }
 
-  logger.info('签名密钥更新成功');
-
-  // 验证公钥已更新
-  const updatedPublicKey = await channelsApi.getPublicKey.query({
-    id: channelId,
-  });
-
-  if (updatedPublicKey !== TEST_SIGNING_KEYS_2.publicKey) {
-    throw new Error('公钥更新失败：公钥未变更');
+  if (resultStr.includes('privateKey')) {
+    throw new Error('安全风险：响应中包含私钥字段');
   }
 
-  logger.info('验证成功：公钥已更新');
-
-  return result;
+  logger.info('验证成功：公钥响应中不包含私钥信息');
 }
 
 /** 删除测试渠道 */
@@ -393,7 +389,7 @@ async function deleteTestOrganization(
 // ========== 主测试流程 ==========
 
 async function main() {
-  logger.info('开始 setSigningKeys API 测试', { apiUrl: API_URL });
+  logger.info('开始 getPublicKey API 测试', { apiUrl: API_URL });
 
   const client = createClient(API_URL);
   let testOrgId: string | undefined;
@@ -424,20 +420,23 @@ async function main() {
     );
     testChannelId = testChannel.id;
 
-    // 5. 验证初始状态（签名未启用）
-    await verifyInitialState(accessToken, testChannelId);
+    // 5. 测试未启用签名时获取公钥
+    await testGetPublicKeyWithoutSigning(accessToken, testChannelId);
 
-    // 6. 测试设置签名密钥
-    await testSetSigningKeys(accessToken, testChannelId);
+    // 6. 设置签名密钥
+    await setSigningKeys(accessToken, testChannelId);
 
-    // 7. 验证签名已启用
-    await verifySigningEnabled(accessToken, testChannelId);
-
-    // 8. 测试获取公钥
+    // 7. 测试获取公钥
     await testGetPublicKey(accessToken, testChannelId);
 
-    // 9. 测试更新签名密钥
-    await testUpdateSigningKeys(accessToken, testChannelId);
+    // 8. 验证公钥格式
+    await verifyPublicKeyFormat(accessToken, testChannelId);
+
+    // 9. 测试获取不存在渠道的公钥
+    await testGetPublicKeyNonExistent(accessToken);
+
+    // 10. 测试公钥不会返回私钥信息
+    await testNoPrivateKeyExposure(accessToken, testChannelId);
 
     logger.info('所有测试通过！');
   } catch (error) {

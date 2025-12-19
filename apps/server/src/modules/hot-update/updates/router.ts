@@ -109,4 +109,64 @@ export const updatesRouter = router({
     .mutation(({ ctx, input }) =>
       updateService.incrementInstallCount(ctx.db, input.id)
     ),
+
+  // ========== Bundle 上传 ==========
+  /**
+   * 上传 Bundle（FormData）
+   *
+   * FormData 字段：
+   * - channelId: 渠道 ID
+   * - runtimeVersion: 运行时版本
+   * - bundle: ZIP 文件
+   * - description?: 更新描述
+   * - metadata?: JSON 字符串
+   * - extra?: JSON 字符串
+   * - rolloutPercentage?: 灰度比例（0-100）
+   */
+  upload: protectedProcedure
+    .input(z.instanceof(FormData))
+    .mutation(async ({ ctx, input }) => {
+      // 提取 FormData 字段
+      const channelId = input.get('channelId');
+      const runtimeVersion = input.get('runtimeVersion');
+      const bundleFile = input.get('bundle');
+      const description = input.get('description');
+      const metadata = input.get('metadata');
+      const extra = input.get('extra');
+      const rolloutPercentage = input.get('rolloutPercentage');
+
+      // 验证必填字段
+      if (typeof channelId !== 'string' || !channelId) {
+        throw new Error('channelId 是必填字段');
+      }
+      if (typeof runtimeVersion !== 'string' || !runtimeVersion) {
+        throw new Error('runtimeVersion 是必填字段');
+      }
+      if (!(bundleFile instanceof File)) {
+        throw new Error('bundle 必须是文件');
+      }
+
+      // 读取文件内容
+      const bundleBuffer = Buffer.from(
+        await bundleFile.arrayBuffer()
+      );
+
+      return updateService.uploadBundle(ctx.db, {
+        channelId,
+        runtimeVersion,
+        description:
+          typeof description === 'string' ? description : undefined,
+        metadata:
+          typeof metadata === 'string'
+            ? JSON.parse(metadata)
+            : undefined,
+        extra:
+          typeof extra === 'string' ? JSON.parse(extra) : undefined,
+        rolloutPercentage:
+          typeof rolloutPercentage === 'string'
+            ? parseInt(rolloutPercentage, 10)
+            : undefined,
+        bundleBuffer,
+      });
+    }),
 });

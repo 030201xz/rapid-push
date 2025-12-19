@@ -12,7 +12,11 @@ import {
   nodeEnvSchema,
   portSchema,
 } from '@rapid-s/config';
+import { join } from 'node:path';
 import { z } from 'zod';
+
+/** 存储类型 Schema */
+const storageTypeSchema = z.enum(['local', 's3', 'r2', 'webdav']);
 
 export const env = createEnv({
   schema: {
@@ -76,6 +80,44 @@ export const env = createEnv({
       connectTimeout: z.coerce.number().int().min(0).default(10_000),
       /** 每次请求最大重试次数 -> REDIS_MAX_RETRIES */
       maxRetriesPerRequest: z.coerce.number().int().min(0).default(3),
+    },
+
+    // ========== 存储配置 ==========
+    storage: {
+      /** 存储类型 -> STORAGE_TYPE */
+      type: storageTypeSchema.default('local'),
+      /** 本地存储路径 -> STORAGE_LOCAL_PATH */
+      localPath: z.string().default(join(process.cwd(), 'storage')),
+
+      // S3 配置
+      /** S3 存储桶 -> S3_BUCKET */
+      s3Bucket: z.string().optional(),
+      /** S3 访问密钥 ID -> S3_ACCESS_KEY_ID */
+      s3AccessKeyId: z.string().optional(),
+      /** S3 访问密钥 -> S3_SECRET_ACCESS_KEY */
+      s3SecretAccessKey: z.string().optional(),
+      /** S3 端点 -> S3_ENDPOINT */
+      s3Endpoint: z.string().optional(),
+      /** S3 区域 -> S3_REGION */
+      s3Region: z.string().optional(),
+
+      // R2 配置
+      /** R2 账户 ID -> R2_ACCOUNT_ID */
+      r2AccountId: z.string().optional(),
+      /** R2 存储桶 -> R2_BUCKET */
+      r2Bucket: z.string().optional(),
+      /** R2 访问密钥 ID -> R2_ACCESS_KEY_ID */
+      r2AccessKeyId: z.string().optional(),
+      /** R2 访问密钥 -> R2_SECRET_ACCESS_KEY */
+      r2SecretAccessKey: z.string().optional(),
+
+      // WebDAV 配置
+      /** WebDAV URL -> WEBDAV_URL */
+      webdavUrl: z.string().optional(),
+      /** WebDAV 用户名 -> WEBDAV_USERNAME */
+      webdavUsername: z.string().optional(),
+      /** WebDAV 密码 -> WEBDAV_PASSWORD */
+      webdavPassword: z.string().optional(),
     },
   },
 });
