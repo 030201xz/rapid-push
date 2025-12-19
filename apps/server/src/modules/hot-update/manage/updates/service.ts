@@ -122,6 +122,7 @@ export async function createRollback(
   const source = await getUpdateById(db, sourceUpdateId);
   if (!source) throw new Error('源更新不存在');
 
+  // 1. 创建回滚更新记录
   const [rollback] = await db
     .insert(updates)
     .values({
@@ -137,6 +138,24 @@ export async function createRollback(
     .returning();
 
   if (!rollback) throw new Error('创建回滚失败');
+
+  // 2. 复制源更新的资源关联到新的回滚更新
+  const sourceAssets = await updateAssetService.listAssetsByUpdate(
+    db,
+    sourceUpdateId
+  );
+
+  if (sourceAssets.length > 0) {
+    const rollbackAssets = sourceAssets.map(asset => ({
+      updateId: rollback.id,
+      assetId: asset.assetId,
+      isLaunchAsset: asset.isLaunchAsset,
+      platform: asset.platform,
+    }));
+
+    await updateAssetService.createUpdateAssets(db, rollbackAssets);
+  }
+
   return rollback;
 }
 

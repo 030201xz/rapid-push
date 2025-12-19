@@ -1,0 +1,5 @@
+// Android Bundle v1.0.0
+console.log("Hello from Android Hot Update!");
+export default function App() {
+  return { platform: "android", version: "1.0.0", timestamp: 1766136412430 };
+}

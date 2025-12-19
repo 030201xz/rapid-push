@@ -1,5 +1,5 @@
 {
-  "id": "2db6fbd3-21ad-4101-b66a-760af9d700ac",
+  "id": "10068b47-a9af-4cd2-b946-54a61f200612",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -932,108 +932,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "rapid_s.assets": {
-      "name": "assets",
-      "schema": "rapid_s",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "hash": {
-          "name": "hash",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "key": {
-          "name": "key",
-          "type": "varchar(500)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content_type": {
-          "name": "content_type",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "file_extension": {
-          "name": "file_extension",
-          "type": "varchar(20)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "storage_path": {
-          "name": "storage_path",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "size": {
-          "name": "size",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_assets_hash": {
-          "name": "idx_assets_hash",
-          "columns": [
-            {
-              "expression": "hash",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_assets_content_type": {
-          "name": "idx_assets_content_type",
-          "columns": [
-            {
-              "expression": "content_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "assets_hash_unique": {
-          "name": "assets_hash_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "hash"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "rapid_s.channels": {
       "name": "channels",
       "schema": "rapid_s",
@@ -1738,148 +1636,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "rapid_s.update_assets": {
-      "name": "update_assets",
-      "schema": "rapid_s",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "update_id": {
-          "name": "update_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "asset_id": {
-          "name": "asset_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_launch_asset": {
-          "name": "is_launch_asset",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "platform": {
-          "name": "platform",
-          "type": "varchar(10)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_update_assets_update_id": {
-          "name": "idx_update_assets_update_id",
-          "columns": [
-            {
-              "expression": "update_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_update_assets_asset_id": {
-          "name": "idx_update_assets_asset_id",
-          "columns": [
-            {
-              "expression": "asset_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_update_assets_platform": {
-          "name": "idx_update_assets_platform",
-          "columns": [
-            {
-              "expression": "platform",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_update_assets_is_launch": {
-          "name": "idx_update_assets_is_launch",
-          "columns": [
-            {
-              "expression": "is_launch_asset",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "update_assets_update_id_updates_id_fk": {
-          "name": "update_assets_update_id_updates_id_fk",
-          "tableFrom": "update_assets",
-          "tableTo": "updates",
-          "schemaTo": "rapid_s",
-          "columnsFrom": [
-            "update_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "update_assets_asset_id_assets_id_fk": {
-          "name": "update_assets_asset_id_assets_id_fk",
-          "tableFrom": "update_assets",
-          "tableTo": "assets",
-          "schemaTo": "rapid_s",
-          "columnsFrom": [
-            "asset_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "rapid_s.updates": {
       "name": "updates",
       "schema": "rapid_s",
@@ -2042,6 +1798,250 @@
           "schemaTo": "rapid_s",
           "columnsFrom": [
             "channel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "rapid_s.assets": {
+      "name": "assets",
+      "schema": "rapid_s",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "hash": {
+          "name": "hash",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content_type": {
+          "name": "content_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "file_extension": {
+          "name": "file_extension",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "storage_path": {
+          "name": "storage_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "size": {
+          "name": "size",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_assets_hash": {
+          "name": "idx_assets_hash",
+          "columns": [
+            {
+              "expression": "hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_assets_content_type": {
+          "name": "idx_assets_content_type",
+          "columns": [
+            {
+              "expression": "content_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "assets_hash_unique": {
+          "name": "assets_hash_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "hash"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "rapid_s.update_assets": {
+      "name": "update_assets",
+      "schema": "rapid_s",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "update_id": {
+          "name": "update_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "asset_id": {
+          "name": "asset_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_launch_asset": {
+          "name": "is_launch_asset",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "platform": {
+          "name": "platform",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "idx_update_assets_update_id": {
+          "name": "idx_update_assets_update_id",
+          "columns": [
+            {
+              "expression": "update_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_update_assets_asset_id": {
+          "name": "idx_update_assets_asset_id",
+          "columns": [
+            {
+              "expression": "asset_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_update_assets_platform": {
+          "name": "idx_update_assets_platform",
+          "columns": [
+            {
+              "expression": "platform",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_update_assets_is_launch": {
+          "name": "idx_update_assets_is_launch",
+          "columns": [
+            {
+              "expression": "is_launch_asset",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "update_assets_update_id_updates_id_fk": {
+          "name": "update_assets_update_id_updates_id_fk",
+          "tableFrom": "update_assets",
+          "tableTo": "updates",
+          "schemaTo": "rapid_s",
+          "columnsFrom": [
+            "update_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "update_assets_asset_id_assets_id_fk": {
+          "name": "update_assets_asset_id_assets_id_fk",
+          "tableFrom": "update_assets",
+          "tableTo": "assets",
+          "schemaTo": "rapid_s",
+          "columnsFrom": [
+            "asset_id"
           ],
           "columnsTo": [
             "id"

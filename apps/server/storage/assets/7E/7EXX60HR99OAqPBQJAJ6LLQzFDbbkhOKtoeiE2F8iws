@@ -1,0 +1,5 @@
+// iOS Bundle v1.0.0
+console.log("Hello from iOS Hot Update!");
+export default function App() {
+  return { platform: "ios", version: "1.0.0", timestamp: 1766136153597 };
+}

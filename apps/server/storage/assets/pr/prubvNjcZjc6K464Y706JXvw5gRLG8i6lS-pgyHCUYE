@@ -1,0 +1,5 @@
+// iOS Bundle v2.0.0 - 有问题的版本，需要回滚
+console.log("Buggy v2 Update!");
+export default function App() {
+  throw new Error("Bug in v2!");
+}
