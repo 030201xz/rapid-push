@@ -36,8 +36,9 @@ export interface LogoutResult {
  * 1. 撤销会话 (PostgreSQL)
  * 2. 撤销该会话的所有 RT (PostgreSQL)
  * 3. 将当前 AT 加入黑名单 (Redis)
- * 4. 使 Session 缓存失效 (Redis)
- * 5. 从用户活跃会话列表移除 (Redis)
+ * 4. 将 Session 加入撤销列表 (Redis) - 使该会话的所有 AT 失效
+ * 5. 使 Session 缓存失效 (Redis)
+ * 6. 从用户活跃会话列表移除 (Redis)
  */
 export async function logoutSession(
   db: Database,
@@ -74,10 +75,13 @@ export async function logoutSession(
     await redisService.blacklistAccessToken(redis, currentAtJti);
   }
 
-  // 5. 使 Session 缓存失效 (Redis)
+  // 5. 将 Session 加入撤销列表 (Redis) - 使该会话的所有 AT 立即失效
+  await redisService.revokeSession(redis, sessionId);
+
+  // 6. 使 Session 缓存失效 (Redis)
   await redisService.invalidateSessionCache(redis, sessionId);
 
-  // 6. 从用户活跃会话列表移除 (Redis)
+  // 7. 从用户活跃会话列表移除 (Redis)
   await redisService.removeUserActiveSession(
     redis,
     session.userId,

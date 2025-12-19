@@ -11,6 +11,7 @@
  * 运行: bun run src/modules/core/identify/auth/__test__/api/revokeSession.ts
  */
 
+import { verifyToken } from '@/common/auth/jwt';
 import { env } from '@/common/env';
 import { createClient, type Client } from '@client/index';
 import { createLogger } from '@rapid-s/logger';
@@ -48,6 +49,15 @@ async function login(client: Client, deviceName?: string) {
   }
 
   return result.accessToken!;
+}
+
+/** 从 Token 中解析 sessionId */
+async function getSessionIdFromToken(token: string): Promise<string> {
+  const result = await verifyToken(token);
+  if (!result.valid || !result.sessionId) {
+    throw new Error('无法从 Token 解析 sessionId');
+  }
+  return result.sessionId;
 }
 
 /** 模拟多设备登录 */
@@ -158,7 +168,7 @@ async function cleanup(accessToken: string) {
     await auth.logoutAll.mutate();
     logger.info('清理完成');
   } catch (error) {
-    logger.warn('清理失败', { error });
+    logger.error('清理失败', { error });
   }
 }
 
@@ -180,7 +190,11 @@ async function main() {
     }
     validToken = token1;
 
-    // 2. 获取会话列表
+    // 2. 从 Token 解析 sessionId（准确识别会话）
+    const sessionId2 = await getSessionIdFromToken(token2);
+    logger.info('解析 token2 的 sessionId', { sessionId2 });
+
+    // 3. 获取会话列表（验证会话存在）
     const sessions = await getSessions(token1);
     logger.info('获取会话列表', { sessionCount: sessions.length });
 
@@ -188,15 +202,8 @@ async function main() {
       throw new Error('会话数量不足，无法测试撤销功能');
     }
 
-    // 3. 找到 token2 对应的会话（通常是最新的那个）
-    // 注意：需要根据实际的 session 结构来确定
-    const sessionToRevoke = sessions[sessions.length - 1];
-    if (!sessionToRevoke) {
-      throw new Error('无法获取要撤销的会话');
-    }
-
-    // 4. 撤销第二个设备的会话
-    await testRevokeSession(token1, sessionToRevoke.id);
+    // 4. 撤销 token2 对应的会话（使用准确的 sessionId）
+    await testRevokeSession(token1, sessionId2);
 
     // 5. 验证被撤销的 Token 失效
     await testRevokedTokenInvalid(token2);
